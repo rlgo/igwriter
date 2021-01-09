@@ -37,6 +37,7 @@ yarn-error.log*
 /build
 
 # misc
+.eslintcache
 .DS_Store
 .env.local
 .env.development.local

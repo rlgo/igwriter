@@ -3,50 +3,54 @@ import { HiHome, HiOutlineHome } from 'react-icons/hi'
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai'
 import { BsPeopleFill, BsPeople } from 'react-icons/bs'
 import React, { MouseEventHandler } from 'react'
-import './Tab.css'
 import { IconType } from 'react-icons'
-import { navigateCb } from './App'
+import { Link } from 'react-router-dom'
+import { Path } from './App'
 
 const blue = "#0178D4"
 const grey = "#6E6E6E"
 
 type ButtonProps = {
-  text: string,
+  path: Path,
   icon: IconType,
   iconAlt: IconType,
-  selected: boolean,
-  click: MouseEventHandler
+  link: Path
 }
 
-function Button({ text, icon, iconAlt, selected, click }: ButtonProps) {
+function Button({ path, icon, iconAlt, link }: ButtonProps) {
+  const selected = path === link
+  const text = uppercase(link)
   const color = selected ? blue : grey
   const onClick: MouseEventHandler = e => {
-    //ripple
-    click(e)
+    //TODO: ripples
   }
 
   return (
-    <VStack spacing={0} cursor="pointer" w="24%" onClick={onClick}>
-      <Icon as={selected ? icon : iconAlt} w={7} h={7} color={color} />
-      <Text fontSize="xs" color={color}>{text}</Text>
-    </VStack>
+    <Link to={link}>
+      <VStack w="25vw" spacing={0} cursor="pointer" onClick={onClick}>
+        <Icon as={selected ? icon : iconAlt} w={7} h={7} color={color} />
+        <Text fontSize="xs" color={color}>{text}</Text>
+      </VStack>
+    </Link>
   )
+
+  function uppercase(text: string) {
+    text = text.replace("/", "")
+    return text.charAt(0).toUpperCase() + text.slice(1)
+  }
 }
 
 type TabProps = {
-  navigate: navigateCb
+  path: Path
 }
 
-export default function Tab({ navigate }: TabProps) {
+export default function Tab({ path }: TabProps) {
   return (
     <Box pos="fixed" bottom="0" w="100%" p="0.5rem" boxShadow="0 0 20px rgba(0,0,0,0.16)" >
       <HStack justify={'space-evenly'}>
-        <Button text="Home" icon={HiHome} iconAlt={HiOutlineHome} selected={true}
-          click={() => { navigate("home") }} />
-        <Button text="Favourites" icon={AiFillStar} iconAlt={AiOutlineStar} selected={false}
-          click={() => { navigate("favorite") }} />
-        <Button text="Shared" icon={BsPeopleFill} iconAlt={BsPeople} selected={false}
-          click={() => { navigate("shared") }} />
+        <Button path={path} icon={HiHome} iconAlt={HiOutlineHome} link={Path.HOME} />
+        <Button path={path} icon={AiFillStar} iconAlt={AiOutlineStar} link={Path.FAVORITES} />
+        <Button path={path} icon={BsPeopleFill} iconAlt={BsPeople} link={Path.SHARED} />
       </HStack>
     </Box >
   )

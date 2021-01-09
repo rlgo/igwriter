@@ -1,28 +1,52 @@
 import React from 'react'
-import logo from './logo.svg'
-import './App.css'
 import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
+  Redirect,
 } from "react-router-dom";
-import { Box } from '@chakra-ui/react'
 import Tab from './Tab'
+import Page from './Page';
 
-export type navigateCb = (link: "home" | "favorite" | "shared") => void
-const navigate: navigateCb = (link) => {
-  console.log(link)
+type HomePageProps = {
+  path: Path
+}
+
+function HomePage({ path }: HomePageProps) {
+  return (
+    <React.Fragment>
+      <Page path={path} />
+      <Tab path={path} />
+    </React.Fragment>
+  )
+}
+
+export enum Path {
+  HOME = "/home",
+  FAVORITES = "/favorites",
+  SHARED = "/shared"
 }
 
 function App() {
   return (
-    <React.Fragment>
-      <Box w="100%" id="content" >
+    <Router>
+      <Switch>
+        <Route path={Path.HOME}>
+          <HomePage path={Path.HOME} />
+        </Route>
+        <Route path={Path.FAVORITES}>
+          <HomePage path={Path.FAVORITES} />
+        </Route>
+        <Route path={Path.SHARED}>
+          <HomePage path={Path.SHARED} />
+        </Route>
 
-      </Box>
-      <Tab navigate={navigate} />
-    </React.Fragment>
+        {/* {default to home path} */}
+        <Route path="/">
+          <Redirect to={Path.HOME} />
+        </Route>
+      </Switch>
+    </Router>
   )
 }
 
