@@ -1,5 +1,5 @@
 import { Box, Icon, HStack, VStack, Text } from '@chakra-ui/react'
-import { HiHome, HiOutlineHome } from 'react-icons/hi'
+import { HiHome } from 'react-icons/hi'
 import { VscHome } from 'react-icons/vsc'
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai'
 import { BsPeopleFill, BsPeople } from 'react-icons/bs'
@@ -10,6 +10,7 @@ import { Path } from './App'
 
 const blue = "#0178D4"
 const grey = "#6E6E6E"
+const maxWidth = "800px"
 
 type ButtonProps = {
   path: Path,
@@ -48,7 +49,7 @@ type TabProps = {
 export default function Tab({ path }: TabProps) {
   return (
     <Box pos="fixed" bottom="0" w="100%" p="0.5rem" boxShadow="0 0 10px rgba(0,0,0,0.10)" >
-      <HStack justify={'space-evenly'}>
+      <HStack justify="space-evenly" maxW={maxWidth} m="auto" >
         <Button path={path} icon={HiHome} iconAlt={VscHome} link={Path.HOME} />
         <Button path={path} icon={AiFillStar} iconAlt={AiOutlineStar} link={Path.FAVORITES} />
         <Button path={path} icon={BsPeopleFill} iconAlt={BsPeople} link={Path.SHARED} />

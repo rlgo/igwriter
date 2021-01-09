@@ -6,6 +6,7 @@ import { Path } from './App'
 import firebase from "./fire";
 
 const padding = "1.1rem"
+const maxWidth = "800px"
 
 type TopbarProps = {
   path: Path
@@ -18,22 +19,22 @@ function Topbar({ path }: TopbarProps) {
 
   return (
     <Box bg={blue} w="100%" p={padding} paddingTop="0.7rem" paddingBottom="0.7rem">
-      <HStack justify="space-between">
+      <HStack justify="space-between" maxW={maxWidth} m="auto">
         <HStack spacing={spacing}>
           <Avatar size="sm" src={user?.photoURL || ""} />
           <Text color="white" fontSize="1.2rem" fontWeight="500">{uppercase(path)}</Text>
         </HStack>
         <HStack spacing={spacing}>
           <Icon as={VscAdd} w={6} h={6} color="white" onClick={() => login()} />
-          <Icon as={VscSearch} w={6} h={6} color="white" />
+          <Icon as={VscSearch} w={6} h={6} color="white" className="flip" />
         </HStack>
       </HStack>
     </Box >
   )
 
   function login() {
-    // firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
-    firebase.auth().signOut();
+    firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    // firebase.auth().signOut();
   }
 }
 
@@ -43,7 +44,7 @@ type FilesProps = {
 
 function Files({ path }: FilesProps) {
   return (
-    <Box p={padding}>
+    <Box p={padding} w="100vw">
       <Hint type={Path.HOME} />
       <br></br>
       <Hint type={Path.FAVORITES} />
@@ -60,9 +61,8 @@ function Files({ path }: FilesProps) {
       [Path.FAVORITES]: "Tap the \u22EE icon next to your draft and mark any draft as favorite to access it faster in the future.",
       [Path.SHARED]: "Invite your friends or enemies to collaborate on the draft that you currently work on to boost productivity."
     }
-    return <Box fontSize={size} color="GrayText" bg={lightgrey} p={padding} rounded="md">
-      {description[type]}
-    </Box>
+    return <Box fontSize={size} maxW={maxWidth} color="GrayText" m="auto" bg={lightgrey} p={padding} rounded="md">
+      {description[type]}</Box>
   }
 }
 
