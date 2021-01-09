@@ -5,6 +5,8 @@ import { ChakraProvider } from "@chakra-ui/react"
 import App from './App'
 import * as fire from './fire'
 
+fire.init()
+
 ReactDOM.render(
   <React.StrictMode>
     <ChakraProvider>
@@ -13,5 +15,3 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root')
 )
-
-fire.init()
