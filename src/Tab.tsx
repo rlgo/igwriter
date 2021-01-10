@@ -29,7 +29,7 @@ function Button({ path, icon, iconAlt, link }: ButtonProps) {
 
   return (
     <Link to={link}>
-      <VStack w="25vw" spacing={0} cursor="pointer" onClick={onClick}>
+      <VStack spacing={0} cursor="pointer" onClick={onClick}>
         <Icon as={selected ? icon : iconAlt} w={7} h={7} color={color} />
         <Text fontSize="xs" color={color}>{text}</Text>
       </VStack>
@@ -49,7 +49,7 @@ type TabProps = {
 export default function Tab({ path }: TabProps) {
   return (
     <Box pos="fixed" bottom="0" w="100%" p="0.5rem" boxShadow="0 0 10px rgba(0,0,0,0.10)" >
-      <HStack justify="space-evenly" maxW={maxWidth} m="auto" >
+      <HStack justify="space-evenly" m="auto" maxW={maxWidth} >
         <Button path={path} icon={HiHome} iconAlt={VscHome} link={Path.HOME} />
         <Button path={path} icon={AiFillStar} iconAlt={AiOutlineStar} link={Path.FAVORITES} />
         <Button path={path} icon={BsPeopleFill} iconAlt={BsPeople} link={Path.SHARED} />

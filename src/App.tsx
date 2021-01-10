@@ -23,6 +23,7 @@ function HomePage({ path }: HomePageProps) {
 
 export enum Path {
   HOME = "/home",
+  RECENT = "/recent",
   FAVORITES = "/favorites",
   SHARED = "/shared"
 }
@@ -39,6 +40,9 @@ function App() {
         </Route>
         <Route path={Path.SHARED}>
           <HomePage path={Path.SHARED} />
+        </Route>
+        <Route path={Path.RECENT}>
+          <HomePage path={Path.RECENT} />
         </Route>
 
         {/* {default to home path} */}

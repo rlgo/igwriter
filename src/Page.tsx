@@ -4,6 +4,7 @@ import React from 'react'
 import { VscAdd, VscSearch } from 'react-icons/vsc'
 import { Path } from './App'
 import firebase from "./fire";
+import { Link } from 'react-router-dom';
 
 const padding = "1.1rem"
 const maxWidth = "800px"
@@ -40,19 +41,26 @@ function Topbar({ path }: TopbarProps) {
 
 type FilesProps = {
   path: Path
+  active?: boolean
 }
 
-function Files({ path }: FilesProps) {
+function Files({ path, active }: FilesProps) {
   const titles = {
-    [Path.HOME]: "Recent Files",
+    [Path.RECENT]: "Recent Files",
     [Path.FAVORITES]: "Favorites Files",
-    [Path.SHARED]: "Shared Files"
+    [Path.SHARED]: "Shared Files",
+    [Path.HOME]: ""
   }
   const title = titles[path]
 
   return (
     <Box maxW={maxWidth} m="auto">
-      <Text mb="0.8rem">{title}</Text>
+      <HStack justify="space-between">
+        <Text mb="0.8rem" fontSize="0.8rem" fontWeight="500">{title}</Text>
+        <Link to={path} hidden={!!active} >
+          <Text mb="0.8rem" fontSize="0.8rem" fontWeight="500" cursor="pointer">See all</Text>
+        </Link>
+      </HStack>
       <Hint type={path} />
       <br />
     </Box>
@@ -62,9 +70,10 @@ function Files({ path }: FilesProps) {
     const size = "0.75rem"
     const lightgrey = "#f8f8f8"
     const description = {
-      [Path.HOME]: "You can start a new draft from scratch, or you can import texts from word documents, pdf or other sources.",
+      [Path.RECENT]: "You can start a new draft from scratch, or you can import texts from word documents, pdf or other sources.",
       [Path.FAVORITES]: "Tap the \u22EE icon next to your draft and mark any draft as favorite to access it faster in the future.",
-      [Path.SHARED]: "Invite your friends or enemies to collaborate on the draft that you currently work on to boost productivity."
+      [Path.SHARED]: "Invite your friends or enemies to collaborate on the draft that you currently work on to boost productivity.",
+      [Path.HOME]: ""
     }
     return <Box fontSize={size} color="GrayText" m="auto" bg={lightgrey} p={padding} rounded="md">
       {description[type]}</Box>
@@ -80,10 +89,13 @@ export default function Page({ path }: PageProps) {
     <VStack>
       <Topbar path={path} />
       <Box p={padding} w="100vw">
-        <Files path={path} />
         {path === Path.HOME
-          ? <><Files path={Path.FAVORITES} /> <Files path={Path.SHARED} /></>
-          : <></>}
+          ? <>
+            <Files path={Path.RECENT} />
+            <Files path={Path.FAVORITES} />
+            <Files path={Path.SHARED} />
+          </>
+          : <Files path={path} active />}
       </Box>
     </VStack>
   )
