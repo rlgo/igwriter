@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   BrowserRouter as Router,
   Switch,
@@ -7,6 +7,8 @@ import {
 } from "react-router-dom";
 import Tab from './Tab'
 import Page from './Page';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import firebase from "./fire";
 
 type HomePageProps = {
   path: Path
@@ -25,10 +27,19 @@ export enum Path {
   HOME = "/home",
   RECENT = "/recent",
   FAVORITES = "/favorites",
-  SHARED = "/shared"
+  SHARED = "/shared",
+  SEARCH = "/search"
 }
 
 function App() {
+  const [auth, loading] = useAuthState(firebase.auth())
+  useEffect(() => {
+    if (!auth && !loading) {
+      firebase.auth().signInAnonymously()
+        .then(res => console.log(res))
+    }
+  }, [auth, loading])
+
   return (
     <Router>
       <Switch>
@@ -43,6 +54,9 @@ function App() {
         </Route>
         <Route path={Path.RECENT}>
           <HomePage path={Path.RECENT} />
+        </Route>
+        <Route path={Path.SEARCH}>
+          <HomePage path={Path.SEARCH} />
         </Route>
 
         {/* {default to home path} */}
