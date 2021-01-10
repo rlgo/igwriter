@@ -29,7 +29,7 @@ function Button({ path, icon, iconAlt, link }: ButtonProps) {
 
   return (
     <Link to={link}>
-      <VStack spacing={0} cursor="pointer" onClick={onClick}>
+      <VStack className="onethird" spacing={0} cursor="pointer" onClick={onClick}>
         <Icon as={selected ? icon : iconAlt} w={7} h={7} color={color} />
         <Text fontSize="xs" color={color}>{text}</Text>
       </VStack>

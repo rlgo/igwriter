@@ -34,10 +34,8 @@ export enum Path {
 function App() {
   const [auth, loading] = useAuthState(firebase.auth())
   useEffect(() => {
-    if (!auth && !loading) {
+    if (!auth && !loading)
       firebase.auth().signInAnonymously()
-        .then(res => console.log(res))
-    }
   }, [auth, loading])
 
   return (

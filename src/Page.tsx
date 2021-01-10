@@ -36,7 +36,6 @@ function Topbar({ path }: TopbarProps) {
   )
 
   async function add() {
-    firebase.auth().signOut()
     firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider())
   }
 }
