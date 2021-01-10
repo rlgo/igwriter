@@ -39,6 +39,7 @@ yarn-error.log*
 # misc
 .eslintcache
 /.firebase
+debug.log
 .DS_Store
 .env.local
 .env.development.local
