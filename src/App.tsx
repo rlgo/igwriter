@@ -9,6 +9,7 @@ import Tab from './Tab'
 import Page from './Page';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import firebase from "./fire";
+import Draft from './Draft';
 
 type HomePageProps = {
   path: Path
@@ -28,7 +29,8 @@ export enum Path {
   RECENT = "/recent",
   FAVORITES = "/favorites",
   SHARED = "/shared",
-  SEARCH = "/search"
+  SEARCH = "/search",
+  DRAFT = "/draft"
 }
 
 function App() {
@@ -55,6 +57,9 @@ function App() {
         </Route>
         <Route path={Path.SEARCH}>
           <HomePage path={Path.SEARCH} />
+        </Route>
+        <Route path={Path.DRAFT + "/:id"}>
+          <Draft />
         </Route>
 
         {/* {default to home path} */}

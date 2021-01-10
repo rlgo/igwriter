@@ -1,10 +1,10 @@
 import { Avatar, Box, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useAuthState } from "react-firebase-hooks/auth";
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { VscAdd, VscSearch } from 'react-icons/vsc'
 import { Path } from './App'
 import firebase from "./fire";
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 const padding = "1.1rem"
 const maxWidth = "800px"
@@ -17,6 +17,7 @@ function Topbar({ path }: TopbarProps) {
   const blue = "#0079d4"
   const spacing = "1.75rem"
   const [user, loading] = useAuthState(firebase.auth())
+  const history = useHistory()
 
   return (
     <Box bg={blue} w="100%" p={padding} paddingTop="0.7rem" paddingBottom="0.7rem">
@@ -38,10 +39,12 @@ function Topbar({ path }: TopbarProps) {
   async function add() {
     if (!user) return
     const doc = await firebase.firestore().collection("drafts").add({
-      title: "Unititled",
-      users: [user.uid]
+      title: "Untitled",
+      users: [user.uid],
+      words: 0,
+      last_open: new Date()
     })
-    console.log(doc)
+    history.push(Path.DRAFT + "/" + doc.id)
   }
 }
 
@@ -57,6 +60,18 @@ function Files({ path, active }: FilesProps) {
     [Path.SHARED]: "Shared Files"
   }
   const title = titles[path] || ""
+  const [user] = useAuthState(firebase.auth())
+  const [list, setList] = useState<any>([]);
+
+  useEffect(() => {
+    if (!user) return
+    firebase.firestore().collection("drafts")
+      .where("users", "array-contains", user.uid)
+      .get()
+      .then(snapshot => setList(snapshot.docs))
+  }, [user])
+
+  console.log(list)
 
   return (
     <Box maxW={maxWidth} m="auto">
@@ -66,7 +81,9 @@ function Files({ path, active }: FilesProps) {
           <Text mb="0.8rem" fontSize="0.8rem" fontWeight="500" cursor="pointer">See all</Text>
         </Link>
       </HStack>
-      <Hint type={path} />
+      {list.length === 0
+        ? <Hint type={path} />
+        : <List list={list} />}
       <br />
     </Box>
   )
@@ -82,6 +99,17 @@ function Files({ path, active }: FilesProps) {
     return <Box fontSize={size} color="GrayText" m="auto" bg={lightgrey} p={padding} rounded="md">
       {description[type]}</Box>
   }
+}
+
+type ListProps = {
+  list: any[]
+}
+
+function List({ list }: ListProps) {
+  list = list.map(doc => doc.data())
+  return (
+    <Box>{list[0].title}</Box>
+  )
 }
 
 type PageProps = {
