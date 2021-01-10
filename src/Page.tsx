@@ -5,6 +5,7 @@ import { VscAdd, VscSearch } from 'react-icons/vsc'
 import { Path } from './App'
 import firebase from "./fire";
 import { Link, useHistory } from 'react-router-dom';
+import dayjs from 'dayjs';
 
 const padding = "1.1rem"
 const maxWidth = "800px"
@@ -71,8 +72,6 @@ function Files({ path, active }: FilesProps) {
       .then(snapshot => setList(snapshot.docs))
   }, [user])
 
-  console.log(list)
-
   return (
     <Box maxW={maxWidth} m="auto">
       <HStack justify="space-between">
@@ -83,7 +82,7 @@ function Files({ path, active }: FilesProps) {
       </HStack>
       {list.length === 0
         ? <Hint type={path} />
-        : <List list={list} />}
+        : <FileList list={list} />}
       <br />
     </Box>
   )
@@ -105,10 +104,23 @@ type ListProps = {
   list: any[]
 }
 
-function List({ list }: ListProps) {
-  list = list.map(doc => doc.data())
+function FileList({ list }: ListProps) {
+  list = list.map(doc => ({ id: doc.id, ...doc.data() }))
   return (
-    <Box>{list[0].title}</Box>
+    <Box>
+      {list.map(draft => (
+        <HStack key={draft.id}>
+          <HStack>
+            <Icon />
+            <VStack>
+              <Text >{draft.title}</Text>
+              <Text >{draft.words}.{dayjs(draft.last_open.toDate()).format("DD-MMM-YYYY")}</Text>
+            </VStack>
+          </HStack>
+          <Icon />
+        </HStack>
+      ))}
+    </Box>
   )
 }
 
