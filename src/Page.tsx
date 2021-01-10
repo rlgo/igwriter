@@ -36,7 +36,12 @@ function Topbar({ path }: TopbarProps) {
   )
 
   async function add() {
-    firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider())
+    if (!user) return
+    const doc = await firebase.firestore().collection("drafts").add({
+      title: "Unititled",
+      users: [user.uid]
+    })
+    console.log(doc)
   }
 }
 
