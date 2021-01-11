@@ -67,11 +67,13 @@ function Files({ path, active }: FilesProps) {
 
   useEffect(() => {
     if (!user) return
-    firebase.firestore().collection("drafts")
+    let query = firebase.firestore().collection("drafts")
       .where("users", "array-contains", user.uid)
-      .get()
-      .then(snapshot => setList(snapshot.docs))
-  }, [user])
+    if (path !== Path.HOME && path !== Path.RECENT) {
+      query = query.where(Path.FAVORITES ? "favorite" : "shared", "==", true)
+    }
+    query.get().then(snapshot => setList(snapshot.docs))
+  }, [user, active, path])
 
   return (
     <Box maxW={maxWidth} m="auto">
@@ -83,7 +85,7 @@ function Files({ path, active }: FilesProps) {
       </HStack>
       {list.length === 0
         ? <Hint type={path} />
-        : <FileList list={list} />}
+        : <FileList list={list.slice(0, active ? list.length : 5)} />}
       <br />
     </Box>
   )
@@ -118,10 +120,13 @@ function FileList({ list }: ListProps) {
               </Icon>
               <VStack spacing="0" align="left">
                 <Text >{draft.title}</Text>
-                <Text >{draft.words} words <span>{dayjs(draft.last_open.toDate()).format("DD MMM YYYY")}</span></Text>
+                <Text color="GrayText" fontSize="0.8rem" >
+                  {draft.words} words
+                  <span> {dayjs(draft.last_open.toDate()).format("DD MMM YYYY")}</span>
+                </Text>
               </VStack>
             </HStack>
-            <Icon as={IoEllipsisVerticalSharp} onClick={() => option(draft.id)} />
+            <Icon as={IoEllipsisVerticalSharp} color="GrayText" w="5" h="5" onClick={() => option(draft.id)} />
           </HStack>
           <Divider hidden={index === list.length - 1} />
         </Box>
