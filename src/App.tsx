@@ -63,7 +63,7 @@ function App() {
         <Route path={Path.DRAFT + "/:id"}>
           <Draft />
         </Route>
-        <Route>
+        <Route path={Path.SETTING}>
           <Setting />
         </Route>
 

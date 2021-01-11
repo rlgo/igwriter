@@ -17,17 +17,16 @@ function Topbar() {
   const [user] = useAuthState(firebase.auth())
 
   return (
-    <VStack w="100%">
+    <VStack w="100vw">
       {/* Top bar */}
-      <Box bg={blue} w="100%" p={padding} paddingTop="1.3rem" paddingBottom="0.9rem"
-        justify="space-between" maxW={maxWidth} m="auto">
-        <HStack spacing={spacing}>
+      <Box bg={blue} w="100%" p={padding} paddingTop="1.3rem" paddingBottom="0.9rem">
+        <HStack spacing={spacing} maxW={maxWidth} m="auto">
           <Icon as={IoArrowBackSharp} w={6} h={6} color="white" onClick={() => history.goBack()} />
           <Text color="white" fontSize="1.2rem" fontWeight="500">Setting</Text>
         </HStack>
       </Box>
       {/* Content */}
-      <Box p="2rem" w="100%">
+      <Box p="2rem" w="100%" maxW={maxWidth}>
         <HStack spacing="2rem" mb="2rem">
           <Avatar size="md" src={user?.photoURL || ""} />
           <VStack align="left" spacing="0">
