@@ -48,7 +48,7 @@ type TabProps = {
 
 export default function Tab({ path }: TabProps) {
   return (
-    <Box pos="fixed" bottom="0" w="100%" p="0.5rem" boxShadow="0 0 10px rgba(0,0,0,0.10)" >
+    <Box pos="fixed" bottom="0" w="100%" p="0.5rem" boxShadow="0 0 10px rgba(0,0,0,0.10)" bg="white" >
       <HStack justify="space-evenly" m="auto" maxW={maxWidth} >
         <Button path={path} icon={HiHome} iconAlt={VscHome} link={Path.HOME} />
         <Button path={path} icon={AiFillStar} iconAlt={AiOutlineStar} link={Path.FAVORITES} />

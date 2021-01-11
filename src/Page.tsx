@@ -1,7 +1,8 @@
-import { Avatar, Box, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Avatar, Box, Divider, HStack, Icon, IconButton, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useAuthState } from "react-firebase-hooks/auth";
 import React, { useEffect, useState } from 'react'
 import { VscAdd, VscSearch } from 'react-icons/vsc'
+import { IoEllipsisVerticalSharp } from 'react-icons/io5'
 import { Path } from './App'
 import firebase from "./fire";
 import { Link, useHistory } from 'react-router-dom';
@@ -108,20 +109,33 @@ function FileList({ list }: ListProps) {
   list = list.map(doc => ({ id: doc.id, ...doc.data() }))
   return (
     <Box>
-      {list.map(draft => (
-        <HStack key={draft.id}>
-          <HStack>
-            <Icon />
-            <VStack>
-              <Text >{draft.title}</Text>
-              <Text >{draft.words}.{dayjs(draft.last_open.toDate()).format("DD-MMM-YYYY")}</Text>
-            </VStack>
+      {list.map((draft, index) => (
+        <Box mb="0.7rem" cursor="pointer" key={draft.id}>
+          <HStack justify="space-between" mb="0.5rem">
+            <HStack onClick={() => open(draft.id)}>
+              <Icon viewBox="0 0 1024 1024" h="8" w="8" mr="1rem">
+                <path d="M789.4 223.4h177.4v732.2c0 37.8-28.8 66.6-66.6 66.6H190.4c-37.8 0-66.6-28.8-66.6-66.6V68.4c0-37.8 28.8-66.6 66.6-66.6h554.7v177.4h44.5v44.2h-0.2z m-66.7-22.1V23.9H190.4c-24.5 0-44.5 20-44.5 44.5v887.2c0 24.5 20 44.5 44.5 44.5h709.8c24.5 0 44.5-20 44.5-44.5V245.5H767.3V201h-44.5l-0.1 0.3z" fill="#9FA0A6" p-id="5785"></path><path d="M212.5 889H878v44.5H212.5zM212.5 778.2H878v44.5H212.5zM212.5 667H878v44.5H212.5z" fill="#9FA0A6" p-id="5786"></path><path d="M101.7 112.6h354.9c24.5 0 44.5 20 44.5 44.5V512c0 24.5-20 44.5-44.5 44.5H101.7c-24.5 0-44.5-20-44.5-44.5V156.8c0-24.2 20-44.2 44.5-44.2z" fill="#05C1E0" p-id="5787"></path><path d="M254.3 459.9V271c0-3.9-3-7-7-7h-58.7c-3.9 0-7-3-7-7v-27.6c0-3.9 3-7 7-7h180.2c3.9 0 7 3 7 7V257c0 3.9-3 7-7 7h-58.4c-3.9 0-7 3-7 7v188.9c0 3.9-3 7-7 7H261c-3.7-0.3-6.7-3.3-6.7-7z" fill="#FFFFFF" p-id="5788"></path>
+              </Icon>
+              <VStack spacing="0" align="left">
+                <Text >{draft.title}</Text>
+                <Text >{draft.words} words <span>{dayjs(draft.last_open.toDate()).format("DD MMM YYYY")}</span></Text>
+              </VStack>
+            </HStack>
+            <Icon as={IoEllipsisVerticalSharp} onClick={() => option(draft.id)} />
           </HStack>
-          <Icon />
-        </HStack>
+          <Divider hidden={index === list.length - 1} />
+        </Box>
       ))}
     </Box>
   )
+
+  function open(id: string) {
+    console.log("open" + id)
+  }
+
+  function option(id: string) {
+    console.log("option" + id)
+  }
 }
 
 type PageProps = {
@@ -132,7 +146,7 @@ export default function Page({ path }: PageProps) {
   return (
     <VStack>
       <Topbar path={path} />
-      <Box p={padding} w="100vw">
+      <Box p={padding} w="100vw" pb="70px">
         {path === Path.HOME
           ? <>
             <Files path={Path.RECENT} />
