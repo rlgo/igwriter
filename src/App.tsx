@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import {
   BrowserRouter as Router,
   Switch,
@@ -18,10 +18,10 @@ type HomePageProps = {
 
 function HomePage({ path }: HomePageProps) {
   return (
-    <React.Fragment>
+    <>
       <Page path={path} />
       <Tab path={path} />
-    </React.Fragment>
+    </>
   )
 }
 

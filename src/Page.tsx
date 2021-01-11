@@ -1,6 +1,6 @@
 import { Avatar, Box, Divider, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useAuthState } from "react-firebase-hooks/auth";
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { VscAdd, VscSearch } from 'react-icons/vsc'
 import { IoEllipsisVerticalSharp } from 'react-icons/io5'
 import { Path } from './App'
