@@ -1,4 +1,4 @@
-import { Avatar, Box, Divider, HStack, Icon, IconButton, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Avatar, Box, Divider, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useAuthState } from "react-firebase-hooks/auth";
 import React, { useEffect, useState } from 'react'
 import { VscAdd, VscSearch } from 'react-icons/vsc'
@@ -8,8 +8,8 @@ import firebase from "./fire";
 import { Link, useHistory } from 'react-router-dom';
 import dayjs from 'dayjs';
 
-const padding = "1.1rem"
-const maxWidth = "800px"
+export const padding = "1.1rem"
+export const maxWidth = "800px"
 
 type TopbarProps = {
   path: Path
@@ -25,9 +25,11 @@ function Topbar({ path }: TopbarProps) {
     <Box bg={blue} w="100%" p={padding} paddingTop="0.7rem" paddingBottom="0.7rem">
       <HStack justify="space-between" paddingTop="0.6rem" maxW={maxWidth} m="auto">
         <HStack spacing={spacing}>
-          {loading
-            ? <Box paddingTop="1px" paddingBottom="1px" paddingRight="8px"><Spinner color="white" /></Box>
-            : <Avatar size="sm" src={user?.photoURL || ""} />}
+          <Link to={Path.SETTING}>
+            {loading
+              ? <Box paddingTop="1px" paddingBottom="1px" paddingRight="8px"><Spinner color="white" /></Box>
+              : <Avatar size="sm" src={user?.photoURL || ""} />}
+          </Link>
           <Text color="white" fontSize="1.2rem" fontWeight="500">{uppercase(path)}</Text>
         </HStack>
         <HStack spacing={spacing}>
