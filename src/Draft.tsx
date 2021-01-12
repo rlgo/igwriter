@@ -1,12 +1,19 @@
 import { Box, HStack, Icon, Text, VStack } from '@chakra-ui/react'
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import { IoArrowBackSharp } from 'react-icons/io5'
 import { Link, useParams } from 'react-router-dom'
 import { padding, maxWidth } from './Page'
+import firebase from "./fire";
 
-function Topbar() {
+type TopbarProps = {
+  name: string,
+  setName: (name: string) => void
+}
+
+function Topbar({ name, setName }: TopbarProps) {
   const blue = "#0079d4"
-  const spacing = "1.75rem"
+  const spacing = "0.75rem"
+  const ref = useRef<HTMLParagraphElement>(null)
 
   return (
     <Box bg={blue} w="100%" p={padding} paddingTop="1.3rem" paddingBottom="0.9rem">
@@ -14,18 +21,40 @@ function Topbar() {
         <Link to="/">
           <Icon as={IoArrowBackSharp} w={6} h={6} color="white" />
         </Link>
-        <Text color="white" fontSize="1.2rem" fontWeight="500">Settings</Text>
+        <Text color="white" fontSize="1.2rem" fontWeight="500" contentEditable="true"
+          pl="1rem" pr="1rem" ref={ref} onBlur={blur}>
+          {name}
+        </Text>
       </HStack>
     </Box>
   )
+
+  function blur() {
+    const name = ref?.current?.textContent
+    setName(name || "")
+  }
 }
 
 export default function Draft() {
   const { id } = useParams<{ id: string }>()
+  const [name, setName] = useState("")
+
+  firebase.firestore().collection("drafts").doc(id).get()
+    .then(doc => {
+      console.log(doc.data())
+      setName(doc.data()?.name || "")
+    })
 
   return (
     <VStack>
-      <Text>{id}</Text>
+      <Topbar name={name} setName={rename} />
     </VStack>
   )
+
+  function rename(name: string) {
+    firebase.firestore().collection("drafts").doc(id).update({
+      "title": name
+    })
+    setName(name)
+  }
 }
