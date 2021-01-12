@@ -15,7 +15,6 @@ export function init() {
   }
   firebase.initializeApp(firebaseConfig)
   firebase.firestore().enablePersistence()
-    .catch(console.error)
   window.fire = firebase
 }
 

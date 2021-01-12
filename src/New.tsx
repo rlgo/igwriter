@@ -24,7 +24,7 @@ export default function New({ open, setOpen }: NewProps) {
         <Sheet.Header />
         <Sheet.Content>
           <VStack mt="1rem" align="left" spacing="1.4rem" color="GrayText">
-            <Text ml={margin} mr={margin}>New Draft</Text>
+            <Text ml={margin} mr={margin} fontWeight="500">New Draft</Text>
             <Divider />
             <VStack pl={margin} pr={margin} align="left">
               <Button click={text} icon={AiOutlineFileText} text="Create empty draft" />

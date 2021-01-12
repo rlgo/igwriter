@@ -11,8 +11,6 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import firebase from "./fire";
 import Draft from './Draft';
 import Setting from "./Setting";
-import New from './New';
-
 
 type HomePageProps = {
   path: Path
@@ -68,7 +66,6 @@ function App() {
         <Route path={Path.SETTING}>
           <Setting />
         </Route>
-
         {/* {default to home path} */}
         <Route path="/">
           <Redirect to={Path.HOME} />

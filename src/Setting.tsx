@@ -7,7 +7,7 @@ import { IoIosLogOut } from 'react-icons/io'
 import { padding, maxWidth } from './Page'
 import { Link } from 'react-router-dom'
 
-function Topbar() {
+export default function Topbar() {
   const blue = "#0079d4"
   const spacing = "1.75rem"
   const margin_bottom = "1.7rem"
@@ -67,12 +67,4 @@ function Topbar() {
   function install() {
     if (!!pwa) pwa.prompt()
   }
-}
-
-export default function Setting() {
-  return (
-    <VStack>
-      <Topbar />
-    </VStack>
-  )
 }

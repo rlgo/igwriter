@@ -35,8 +35,8 @@ function Topbar({ path }: TopbarProps) {
             <Text color="white" fontSize="1.2rem" fontWeight="500">{uppercase(path)}</Text>
           </HStack>
           <HStack spacing={spacing}>
-            <Icon as={VscAdd} w={6} h={6} color="white" onClick={() => setOpen(true)} />
-            <Icon as={VscSearch} w={6} h={6} color="white" className="flip" />
+            <Icon cursor="pointer" as={VscAdd} w={6} h={6} color="white" onClick={() => setOpen(true)} />
+            <Icon cursor="pointer" as={VscSearch} w={6} h={6} color="white" className="flip" />
           </HStack>
         </HStack>
       </Box>
