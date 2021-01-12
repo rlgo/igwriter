@@ -26,11 +26,11 @@ export default function New({ open, setOpen }: NewProps) {
           <VStack mt="1rem" align="left" spacing="1.4rem" color="GrayText">
             <Text ml={margin} mr={margin}>New Draft</Text>
             <Divider />
-            <VStack pl={margin} pr={margin} align="left" spacing="1.75rem">
+            <VStack pl={margin} pr={margin} align="left">
               <Button click={text} icon={AiOutlineFileText} text="Create empty draft" />
-              <Button click={console.log} icon={AiOutlineFileWord} text="Import a Word document" />
-              <Button click={console.log} icon={AiOutlineFilePdf} text="Import a PDF file" />
-              <Button click={console.log} icon={AiOutlineFileImage} text="OCR an image" />
+              <Button click={word} icon={AiOutlineFileWord} text="Import a Word document" />
+              <Button click={pdf} icon={AiOutlineFilePdf} text="Import a PDF file" />
+              <Button click={ocr} icon={AiOutlineFileImage} text="OCR an image" />
             </VStack>
           </VStack>
         </Sheet.Content>
@@ -43,7 +43,7 @@ export default function New({ open, setOpen }: NewProps) {
 
   function Button({ click, icon, text }: ButtonProps) {
     return (
-      <HStack onClick={click} spacing="1.5rem">
+      <HStack onClick={click} spacing="1.5rem" pt="1rem" pb="1rem">
         <Icon as={icon} w={6} h={6} />
         <Text>{text}</Text>
       </HStack>
@@ -63,7 +63,7 @@ export default function New({ open, setOpen }: NewProps) {
 
   }
 
-  function image() {
+  function ocr() {
 
   }
 
