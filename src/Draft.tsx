@@ -4,6 +4,7 @@ import { IoArrowBackSharp } from 'react-icons/io5'
 import { Link, useParams } from 'react-router-dom'
 import { padding, maxWidth } from './Page'
 import firebase from "./fire";
+import Editor from './Editor'
 
 type TopbarProps = {
   name: string,
@@ -22,7 +23,7 @@ function Topbar({ name, setName }: TopbarProps) {
           <Icon as={IoArrowBackSharp} w={6} h={6} color="white" />
         </Link>
         <Text color="white" fontSize="1.2rem" fontWeight="500" contentEditable="true"
-          pl="1rem" pr="1rem" ref={ref} onBlur={blur}>
+          pl="1rem" pr="1rem" ref={ref} onBlur={blur} suppressContentEditableWarning={true}>
           {name}
         </Text>
       </HStack>
@@ -41,13 +42,13 @@ export default function Draft() {
 
   firebase.firestore().collection("drafts").doc(id).get()
     .then(doc => {
-      console.log(doc.data())
-      setName(doc.data()?.name || "")
+      setName(doc.data()?.title || "")
     })
 
   return (
-    <VStack>
+    <VStack h="100vh" spacing="0">
       <Topbar name={name} setName={rename} />
+      <Editor id={id} />
     </VStack>
   )
 

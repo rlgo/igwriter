@@ -43,7 +43,7 @@ export default function New({ open, setOpen }: NewProps) {
 
   function Button({ click, icon, text }: ButtonProps) {
     return (
-      <HStack onClick={click} spacing="1.5rem" pt="1rem" pb="1rem">
+      <HStack onClick={click} spacing="1.5rem" pt="1rem" pb="1rem" cursor="pointer">
         <Icon as={icon} w={6} h={6} />
         <Text>{text}</Text>
       </HStack>
