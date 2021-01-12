@@ -5,8 +5,9 @@ import { VscAdd, VscSearch } from 'react-icons/vsc'
 import { IoEllipsisVerticalSharp } from 'react-icons/io5'
 import { Path } from './App'
 import firebase from "./fire";
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
+import New from './New';
 
 export const padding = "1.1rem"
 export const maxWidth = "800px"
@@ -19,37 +20,29 @@ function Topbar({ path }: TopbarProps) {
   const blue = "#0079d4"
   const spacing = "1.75rem"
   const [user, loading] = useAuthState(firebase.auth())
-  const history = useHistory()
+  const [open, setOpen] = useState(true)
 
   return (
-    <Box bg={blue} w="100%" p={padding} paddingTop="0.7rem" paddingBottom="0.7rem">
-      <HStack justify="space-between" paddingTop="0.6rem" maxW={maxWidth} m="auto">
-        <HStack spacing={spacing}>
-          <Link to={Path.SETTING}>
-            {loading
-              ? <Box paddingTop="1px" paddingBottom="1px" paddingRight="8px"><Spinner color="white" /></Box>
-              : <Avatar size="sm" src={user?.photoURL || ""} />}
-          </Link>
-          <Text color="white" fontSize="1.2rem" fontWeight="500">{uppercase(path)}</Text>
+    <>
+      <Box bg={blue} w="100%" p={padding} paddingTop="0.7rem" paddingBottom="0.7rem">
+        <HStack justify="space-between" paddingTop="0.6rem" maxW={maxWidth} m="auto">
+          <HStack spacing={spacing}>
+            <Link to={Path.SETTING}>
+              {loading
+                ? <Box paddingTop="1px" paddingBottom="1px" paddingRight="8px"><Spinner color="white" /></Box>
+                : <Avatar size="sm" src={user?.photoURL || ""} />}
+            </Link>
+            <Text color="white" fontSize="1.2rem" fontWeight="500">{uppercase(path)}</Text>
+          </HStack>
+          <HStack spacing={spacing}>
+            <Icon as={VscAdd} w={6} h={6} color="white" onClick={() => setOpen(true)} />
+            <Icon as={VscSearch} w={6} h={6} color="white" className="flip" />
+          </HStack>
         </HStack>
-        <HStack spacing={spacing}>
-          <Icon as={VscAdd} w={6} h={6} color="white" onClick={add} />
-          <Icon as={VscSearch} w={6} h={6} color="white" className="flip" />
-        </HStack>
-      </HStack>
-    </Box >
+      </Box>
+      <New open={open} setOpen={setOpen} />
+    </>
   )
-
-  async function add() {
-    if (!user) return
-    const doc = await firebase.firestore().collection("drafts").add({
-      title: "Untitled",
-      users: [user.uid],
-      words: 0,
-      last_open: new Date()
-    })
-    history.push(Path.DRAFT + "/" + doc.id)
-  }
 }
 
 type FilesProps = {

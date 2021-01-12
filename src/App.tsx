@@ -11,6 +11,8 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import firebase from "./fire";
 import Draft from './Draft';
 import Setting from "./Setting";
+import New from './New';
+
 
 type HomePageProps = {
   path: Path
