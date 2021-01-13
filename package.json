@@ -17,6 +17,7 @@
     "dayjs": "^1.10.3",
     "firebase": "^8.2.2",
     "framer-motion": "^2.9.4",
+    "quill-cursors": "^3.0.1",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-firebase-hooks": "^2.2.0",
