@@ -33,6 +33,7 @@ export default function Editor({ id }: EditorProps) {
     (window as any).ref = quillRef;
   }, [quillRef])
 
+  Quill.import("delta")
   Quill.register("modules/cursors", QuillCursors)
 
   return loading ? <></>
