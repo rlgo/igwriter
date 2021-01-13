@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import ReactQuill, { Quill } from "react-quill"
 import * as _Quill from "quill";
 import QuillCursors from "quill-cursors"
@@ -26,6 +26,12 @@ const modules = {
 export default function Editor({ id }: EditorProps) {
   const [loading, setLoading] = useState(false)
   const quillRef = useRef<ReactQuill>(null)
+
+  useEffect(() => {
+    const quillEditor = quillRef.current?.getEditor();
+    (window as any).edit = quillEditor;
+    (window as any).ref = quillRef;
+  }, [quillRef])
 
   Quill.register("modules/cursors", QuillCursors)
 
