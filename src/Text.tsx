@@ -29,7 +29,8 @@ function bold(text: string) {
   const bolds = "𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇"
   let result = ""
   for (const c of text) {
-    result += bolds.charAt(characters.indexOf(c))
+    const index = characters.indexOf(c)
+    result += index !== -1 ? bolds.charAt(index) : c
   }
   return result
 }
