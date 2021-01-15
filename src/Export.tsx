@@ -10,6 +10,10 @@ const actions: Record<style, (text: string) => string> = {
   "strike": strike
 }
 
+export function copy(editor: QuillEditor) {
+  
+}
+
 export function transform(editor: QuillEditor, style: style) {
   const selection = editor.getSelection()
   const index = selection?.index || 0

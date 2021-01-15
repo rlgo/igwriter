@@ -9,6 +9,7 @@ import Editor from './Editor'
 type TopbarProps = {
   name: string,
   setName: (name: string) => void
+  setOpen: (open: boolean) => void
 }
 
 function Topbar({ name, setName }: TopbarProps) {
@@ -39,6 +40,7 @@ function Topbar({ name, setName }: TopbarProps) {
 export default function Draft() {
   const { id } = useParams<{ id: string }>()
   const [name, setName] = useState("")
+  const [open, setOpen] = useState(true)
 
   firebase.firestore().collection("drafts").doc(id).get()
     .then(doc => {
@@ -47,8 +49,8 @@ export default function Draft() {
 
   return (
     <VStack h="100vh" spacing="0">
-      <Topbar name={name} setName={rename} />
-      <Editor id={id} />
+      <Topbar name={name} setName={rename} setOpen={setOpen} />
+      <Editor id={id} open={open} setOpen={setOpen} />
     </VStack>
   )
 

@@ -8,6 +8,17 @@ import Sheet from "react-modal-sheet";
 import { useHistory } from "react-router-dom";
 import { Path } from "./App";
 
+type ButtonProps = { click: MouseEventHandler, icon: IconType, text: string }
+
+export function Button({ click, icon, text }: ButtonProps) {
+  return (
+    <HStack onClick={click} spacing="1.5rem" pt="1rem" pb="1rem" cursor="pointer">
+      <Icon as={icon} w={6} h={6} />
+      <Text>{text}</Text>
+    </HStack>
+  )
+}
+
 type NewProps = {
   open: boolean
   setOpen: (open: boolean) => void
@@ -38,17 +49,6 @@ export default function New({ open, setOpen }: NewProps) {
       <Sheet.Backdrop onTap={() => setOpen(false)} />
     </Sheet >
   )
-
-  type ButtonProps = { click: MouseEventHandler, icon: IconType, text: string }
-
-  function Button({ click, icon, text }: ButtonProps) {
-    return (
-      <HStack onClick={click} spacing="1.5rem" pt="1rem" pb="1rem" cursor="pointer">
-        <Icon as={icon} w={6} h={6} />
-        <Text>{text}</Text>
-      </HStack>
-    )
-  }
 
   function text() {
     setOpen(false)
