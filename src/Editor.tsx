@@ -1,8 +1,15 @@
-import { useEffect, useRef, useState } from "react"
+import React, { MouseEventHandler, useEffect, useRef, useState } from "react"
 import ReactQuill, { Quill } from "react-quill"
 import * as _Quill from "quill";
 import QuillCursors from "quill-cursors"
 import 'react-quill/dist/quill.snow.css'
+import { VStack, Icon, Box, HStack } from "@chakra-ui/react";
+import { IconType } from "react-icons";
+import { AiOutlineBold, AiOutlineItalic, AiOutlineStrikethrough, AiOutlineUnderline } from "react-icons/ai";
+import { transform, style as styleType } from "./Export";
+
+const blue = "#0178D4"
+const grey = "#6E6E6E"
 
 interface UnprivilegedEditor {
   getLength(): number;
@@ -11,6 +18,16 @@ interface UnprivilegedEditor {
   getBounds(index: number, length?: number): _Quill.BoundsStatic;
   getSelection(focus?: boolean): _Quill.RangeStatic;
   getContents(index?: number, length?: number): _Quill.DeltaStatic;
+}
+
+type ButtonProps = {
+  icon: IconType,
+  active: boolean
+  onclick: MouseEventHandler
+}
+
+function Button({ icon, active, onclick }: ButtonProps) {
+  return <Icon as={icon} color={active ? blue : grey} onClick={onclick} className="unselectable" />
 }
 
 type EditorProps = {
@@ -24,12 +41,17 @@ const modules = {
 }
 
 export default function Editor({ id }: EditorProps) {
-  const [loading, setLoading] = useState(false)
   const quillRef = useRef<ReactQuill>(null)
+  const [loading, setLoading] = useState(false)
+  const [style, setStyle] = useState<Record<styleType, boolean>>({
+    "bold": false,
+    "italic": false,
+    "underline": false,
+    "strike": false
+  })
 
   useEffect(() => {
-    const quillEditor = quillRef.current?.getEditor();
-    (window as any).edit = quillEditor;
+    (window as any).edit = quillRef.current?.getEditor();
     (window as any).ref = quillRef;
   }, [quillRef])
 
@@ -37,13 +59,35 @@ export default function Editor({ id }: EditorProps) {
   Quill.register("modules/cursors", QuillCursors)
 
   return loading ? <></>
-    : <ReactQuill
-      ref={quillRef}
-      placeholder="Compose your story here ..."
-      theme="snow"
-      modules={modules}
-      defaultValue={"value"}
-      onChange={onChange} />
+    : <VStack w="100%" h="100%" spacing="0">
+      <Box w="100%">
+        <HStack p="1rem">
+          <Button icon={AiOutlineBold} active={style.bold} onclick={() => click("bold")} />
+          <Button icon={AiOutlineItalic} active={style.italic} onclick={() => click("italic")} />
+          <Button icon={AiOutlineUnderline} active={style.underline} onclick={() => click("underline")} />
+          <Button icon={AiOutlineStrikethrough} active={style.strike} onclick={() => click("strike")} />
+        </HStack>
+      </Box>
+      <ReactQuill
+        ref={quillRef}
+        placeholder="Compose your story here ..."
+        theme="snow"
+        modules={modules}
+        defaultValue={"value"}
+        onChange={onChange} />
+    </VStack>
+
+  function click(type: styleType) {
+    const editor = quillRef.current?.getEditor()
+    if (!editor) return
+    const newStyle = { ...style }
+    const value = !style[type]
+    const selection = editor.getSelection()
+    if (selection) editor.removeFormat(selection.index, selection.length)
+    editor.format(type, value)
+    newStyle[type] = value
+    setStyle(newStyle)
+  }
 
   function onChange(
     content: string,

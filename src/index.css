@@ -35,3 +35,15 @@ code {
     width: 30vw
   }
 }
+
+.ql-container.ql-snow {
+  border: none !important
+}
+
+.unselectable {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}

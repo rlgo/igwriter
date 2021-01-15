@@ -1,7 +1,7 @@
 import * as Quill from "quill";
 import { Quill as QuillEditor } from "react-quill"
 
-type style = "bold" | "italic" | "underline" | "strike"
+export type style = "bold" | "italic" | "underline" | "strike"
 
 const actions: Record<style, (text: string) => string> = {
   "bold": bold,
