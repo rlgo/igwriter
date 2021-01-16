@@ -11,7 +11,8 @@ const actions: Record<style, (text: string) => string> = {
 }
 
 export function copy(editor: QuillEditor) {
-  
+  const contents = editor.getContents()
+  debugger
 }
 
 export function transform(editor: QuillEditor, style: style) {

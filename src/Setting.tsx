@@ -1,4 +1,4 @@
-import { Avatar, Box, Divider, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Avatar, Box, Divider, HStack, Icon, Text, useToast, VStack } from '@chakra-ui/react'
 import firebase from 'firebase'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { VscAdd, VscExtensions } from 'react-icons/vsc'
@@ -8,12 +8,14 @@ import { padding, maxWidth } from './Page'
 import { Link } from 'react-router-dom'
 
 export default function Topbar() {
+  const duration = 2100
   const blue = "#0079d4"
   const spacing = "1.75rem"
   const margin_bottom = "1.7rem"
   const icon_size = 7
   const [user] = useAuthState(firebase.auth())
   const pwa = (window as any).pwa
+  const toast = useToast()
 
   return (
     <VStack w="100vw">
@@ -38,7 +40,7 @@ export default function Topbar() {
         </HStack>
         <Divider />
         {/* Buttons */}
-        <VStack align="left" p="1rem">
+        <VStack align="left" p="1rem" cursor="pointer">
           <HStack spacing="2rem" mb={margin_bottom} onClick={() => login()}>
             <Icon as={VscAdd} w={icon_size} h={icon_size} color="grey" />
             <Text>{user?.isAnonymous ? "Add account" : "Change account"}</Text>
@@ -57,11 +59,32 @@ export default function Topbar() {
   )
 
   function login() {
-    firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider())
+    firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
+      .then(() => toast({
+        title: "Login Successfully",
+        description: "You are now login as " + firebase.auth().currentUser?.displayName,
+        status: "success",
+        duration: duration,
+        isClosable: true
+      }))
+      .catch(() => toast({
+        title: "Login failed",
+        description: "Something wrong. Please try again",
+        status: "error",
+        duration: duration,
+        isClosable: true
+      }))
   }
 
   function logout() {
     firebase.auth().signInAnonymously()
+      .then(() => toast({
+        title: "Logout Successfully",
+        description: "You are now in guest mode",
+        status: "info",
+        duration: duration,
+        isClosable: true
+      }))
   }
 
   function install() {

@@ -12,8 +12,9 @@ import { transform, style as styleType, copy } from "./Export"
 import { Button as SheetButton } from "./New"
 import { VscGitPullRequest, VscSettings } from "react-icons/vsc";
 import { IoShareSocialOutline } from "react-icons/io5";
+import { maxWidth } from "./Page";
+import { format } from "path";
 
-const blue = "#0178D4"
 const grey = "#6E6E6E"
 
 interface UnprivilegedEditor {
@@ -83,7 +84,13 @@ type ButtonProps = {
 }
 
 function Button({ icon, active, onclick }: ButtonProps) {
-  return <Icon as={icon} color={active ? blue : grey} onClick={onclick} className="unselectable" />
+  const horizontal = "0.4rem"
+  const vertical = "0.2rem"
+  return (
+    <Box pr={horizontal} pl={horizontal} pt={vertical} pb={vertical} bg={active ? "#6e6e6e" : "transparent"} borderRadius="4px">
+      <Icon as={icon} color={active ? "white" : grey} onClick={onclick} className="unselectable" />
+    </Box>
+  )
 }
 
 const modules = {
@@ -91,6 +98,8 @@ const modules = {
   toolbar: false,
   history: { userOnly: true },
 }
+
+type Style = "bold" | "italic" | "underline" | "strike" | "none"
 
 type EditorProps = {
   id: string,
@@ -101,12 +110,9 @@ type EditorProps = {
 export default function Editor({ id, open, setOpen }: EditorProps) {
   const quillRef = useRef<ReactQuill>(null)
   const [loading, setLoading] = useState(false)
-  const [style, setStyle] = useState<Record<styleType, boolean>>({
-    "bold": false,
-    "italic": false,
-    "underline": false,
-    "strike": false
-  })
+  const [style, setStyle] = useState<Style>("none")
+  const [character, setCharacter] = useState(0)
+  const [word, setWord] = useState(0)
 
   useEffect(() => {
     (window as any).edit = quillRef.current?.getEditor();
@@ -118,36 +124,41 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
 
   return loading ? <></>
     : <>
-      <VStack w="100%" h="100%" spacing="0">
-        <Box w="100%">
-          <HStack p="1rem">
-            <Button icon={AiOutlineBold} active={style.bold} onclick={() => click("bold")} />
-            <Button icon={AiOutlineItalic} active={style.italic} onclick={() => click("italic")} />
-            <Button icon={AiOutlineUnderline} active={style.underline} onclick={() => click("underline")} />
-            <Button icon={AiOutlineStrikethrough} active={style.strike} onclick={() => click("strike")} />
+      <VStack maxW={maxWidth} w="100%" h="100%" spacing="0">
+        <HStack w="100%" justify="space-between">
+          <HStack p="0.5rem" spacing="0">
+            <Button icon={AiOutlineBold} active={style === "bold"} onclick={() => click("bold")} />
+            <Button icon={AiOutlineItalic} active={style === "italic"} onclick={() => click("italic")} />
+            <Button icon={AiOutlineUnderline} active={style === "underline"} onclick={() => click("underline")} />
+            <Button icon={AiOutlineStrikethrough} active={style === "strike"} onclick={() => click("strike")} />
           </HStack>
-        </Box>
+          <HStack color={grey} mr="1rem" fontSize="0.9rem">
+            <Text>{character} characters</Text>
+            <Text>{word} words</Text>
+          </HStack>
+        </HStack>
         <ReactQuill
           ref={quillRef}
           placeholder="Compose your story here ..."
           theme="snow"
           modules={modules}
-          defaultValue={"value"}
+          defaultValue=""
           onChange={onChange} />
       </VStack>
       <Bottom id={id} editor={quillRef.current?.getEditor()} open={open} setOpen={setOpen} />
     </>
 
-  function click(type: styleType) {
+  function click(type: Style) {
     const editor = quillRef.current?.getEditor()
     if (!editor) return
-    const newStyle = { ...style }
-    const value = !style[type]
-    const selection = editor.getSelection()
-    if (selection) editor.removeFormat(selection.index, selection.length)
-    editor.format(type, value)
-    newStyle[type] = value
-    setStyle(newStyle)
+    if (style === type) {
+      editor.format(style, false)
+      setStyle("none")
+    } else {
+      editor.format(style, false)
+      editor.format(type, true)
+      setStyle(type)
+    }
   }
 
   function onChange(
@@ -156,6 +167,8 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     source: _Quill.Sources,
     editor: UnprivilegedEditor
   ) {
-
+    const text = editor.getText().trim()
+    setCharacter(editor.getLength() - 1)
+    setWord(text.length > 0 ? text.split(" ").length : 0)
   }
 }

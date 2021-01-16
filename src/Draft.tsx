@@ -1,6 +1,6 @@
 import { Box, HStack, Icon, Text, VStack } from '@chakra-ui/react'
 import React, { useRef, useState } from 'react'
-import { IoArrowBackSharp } from 'react-icons/io5'
+import { IoArrowBackSharp, IoEllipsisVerticalSharp } from 'react-icons/io5'
 import { Link, useParams } from 'react-router-dom'
 import { padding, maxWidth } from './Page'
 import firebase from "./fire";
@@ -12,21 +12,24 @@ type TopbarProps = {
   setOpen: (open: boolean) => void
 }
 
-function Topbar({ name, setName }: TopbarProps) {
+function Topbar({ name, setName, setOpen }: TopbarProps) {
   const blue = "#0079d4"
   const spacing = "0.75rem"
   const ref = useRef<HTMLParagraphElement>(null)
 
   return (
     <Box bg={blue} w="100%" p={padding} paddingTop="1.3rem" paddingBottom="0.9rem">
-      <HStack spacing={spacing} maxW={maxWidth} m="auto">
-        <Link to="/">
-          <Icon as={IoArrowBackSharp} w={6} h={6} color="white" />
-        </Link>
-        <Text color="white" fontSize="1.2rem" fontWeight="500" contentEditable="true"
-          pl="1rem" pr="1rem" ref={ref} onBlur={blur} suppressContentEditableWarning={true}>
-          {name}
-        </Text>
+      <HStack justify="space-between" maxW={maxWidth} m="auto">
+        <HStack spacing={spacing}  >
+          <Link to="/">
+            <Icon as={IoArrowBackSharp} w={6} h={6} color="white" />
+          </Link>
+          <Text color="white" fontSize="1.2rem" fontWeight="500" contentEditable="true"
+            pl="1rem" pr="1rem" ref={ref} onBlur={blur} suppressContentEditableWarning={true}>
+            {name}
+          </Text>
+        </HStack>
+        <Icon as={IoEllipsisVerticalSharp} cursor="pointer" w={6} h={6} color="white" onClick={() => setOpen(true)} />
       </HStack>
     </Box>
   )
@@ -40,7 +43,7 @@ function Topbar({ name, setName }: TopbarProps) {
 export default function Draft() {
   const { id } = useParams<{ id: string }>()
   const [name, setName] = useState("")
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
 
   firebase.firestore().collection("drafts").doc(id).get()
     .then(doc => {
