@@ -7,8 +7,9 @@ import { IoIosLogOut } from 'react-icons/io'
 import { padding, maxWidth } from './Page'
 import { Link } from 'react-router-dom'
 
+export const duration = 2100
+
 export default function Topbar() {
-  const duration = 2100
   const blue = "#0079d4"
   const spacing = "1.75rem"
   const margin_bottom = "1.7rem"

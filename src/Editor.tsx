@@ -4,16 +4,16 @@ import * as _Quill from "quill";
 import QuillCursors from "quill-cursors"
 import { Quill as QuillEditor } from "react-quill"
 import 'react-quill/dist/quill.snow.css'
-import { VStack, Icon, Box, HStack, Divider, Text } from "@chakra-ui/react"
+import { VStack, Icon, Box, HStack, Divider, Text, useToast } from "@chakra-ui/react"
 import { IconType } from "react-icons"
 import Sheet from "react-modal-sheet"
-import { AiOutlineBold, AiOutlineCopy, AiOutlineItalic, AiOutlineShareAlt, AiOutlineStrikethrough, AiOutlineUnderline } from "react-icons/ai"
-import { transform, style as styleType, copy } from "./Export"
+import { AiOutlineBold, AiOutlineCopy, AiOutlineItalic, AiOutlineStrikethrough, AiOutlineUnderline } from "react-icons/ai"
+import { copy } from "./Export"
 import { Button as SheetButton } from "./New"
 import { VscGitPullRequest, VscSettings } from "react-icons/vsc";
 import { IoShareSocialOutline } from "react-icons/io5";
 import { maxWidth } from "./Page";
-import { format } from "path";
+import { duration } from "./Setting";
 
 const grey = "#6E6E6E"
 
@@ -35,6 +35,7 @@ type BottomProps = {
 
 function Bottom({ id, open, setOpen, editor }: BottomProps) {
   const margin = "2rem"
+  const toast = useToast()
   return (
     <Sheet isOpen={open} snapPoints={[450]} onClose={() => setOpen(false)}>
       <Sheet.Container>
@@ -57,7 +58,15 @@ function Bottom({ id, open, setOpen, editor }: BottomProps) {
   )
 
   function copyClick() {
-    if (editor) copy(editor)
+    if (editor) {
+      copy(editor).then(() => {
+        toast({
+          title: "Text Copied",
+          status: "success",
+          duration: duration
+        })
+      })
+    }
     setOpen(false)
   }
 
@@ -143,6 +152,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
           theme="snow"
           modules={modules}
           defaultValue=""
+          onChangeSelection={onSelection}
           onChange={onChange} />
       </VStack>
       <Bottom id={id} editor={quillRef.current?.getEditor()} open={open} setOpen={setOpen} />
@@ -170,5 +180,23 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     const text = editor.getText().trim()
     setCharacter(editor.getLength() - 1)
     setWord(text.length > 0 ? text.split(" ").length : 0)
+  }
+
+  function onSelection(
+    range: _Quill.RangeStatic,
+    source: _Quill.Sources,
+    editor: UnprivilegedEditor
+  ) {
+    const formats = quillRef.current?.getEditor().getFormat()
+    const keys = Object.keys(formats || {})
+    if (keys.length > 0) {
+      keys.forEach((val) => {
+        const style = val as Style
+        console.log(style)
+        setStyle(style)
+      })
+    } else {
+      setStyle("none")
+    }
   }
 }

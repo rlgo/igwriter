@@ -1,9 +1,10 @@
+import { toast } from "@chakra-ui/react";
 import * as Quill from "quill";
 import { Quill as QuillEditor } from "react-quill"
 
-export type style = "bold" | "italic" | "underline" | "strike"
+export type Style = "bold" | "italic" | "underline" | "strike"
 
-const actions: Record<style, (text: string) => string> = {
+const actions: Record<Style, (text: string) => string> = {
   "bold": bold,
   "italic": italic,
   "underline": underline,
@@ -12,23 +13,17 @@ const actions: Record<style, (text: string) => string> = {
 
 export function copy(editor: QuillEditor) {
   const contents = editor.getContents()
+  const text = contents.map(op => {
+    const attr = op.attributes
+    const keys = Object.keys(attr || {})
+    const key = keys[0] as Style
+    return key ? actions[key](op.insert) : op.insert
+  }).join()
   debugger
+  return navigator.clipboard.writeText(text)
 }
 
-export function transform(editor: QuillEditor, style: style) {
-  const selection = editor.getSelection()
-  const index = selection?.index || 0
-  const length = selection?.length || 0
-  const current = editor.getText(index, length)
-  const text = actions[style](current)
-  const delta = new Quill.Delta()
-    .retain(index)
-    .delete(length)
-    .insert(text)
-  editor.updateContents(delta)
-}
-
-const characters = "abcdefghijklmnopqrstuvwxyz"
+const characters = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 function bold(text: string) {
   const bolds = "𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇"
