@@ -1,4 +1,4 @@
-import { Avatar, Box, Divider, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Avatar, Box, Divider, HStack, Icon, Spinner, Text, VStack, Heading } from '@chakra-ui/react'
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useEffect, useState } from 'react'
 import { VscAdd, VscSearch } from 'react-icons/vsc'
@@ -27,12 +27,12 @@ function Topbar({ path }: TopbarProps) {
       <Box bg={blue} w="100%" p={padding} paddingTop="0.7rem" paddingBottom="0.7rem">
         <HStack justify="space-between" paddingTop="0.6rem" maxW={maxWidth} m="auto">
           <HStack spacing={spacing}>
-            <Link to={Path.SETTING}>
+            <Link to={Path.SETTING}  >
               {loading
                 ? <Box paddingTop="1px" paddingBottom="1px" paddingRight="8px"><Spinner color="white" /></Box>
                 : <Avatar size="sm" src={user?.photoURL || ""} />}
             </Link>
-            <Text color="white" fontSize="1.2rem" fontWeight="500">{uppercase(path)}</Text>
+            <Heading color="white" fontSize="1.2rem" fontWeight="500">{uppercase(path)}</Heading>
           </HStack>
           <HStack spacing={spacing}>
             <Icon cursor="pointer" as={VscAdd} w={6} h={6} color="white" onClick={() => setOpen(true)} />
