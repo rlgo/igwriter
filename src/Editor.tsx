@@ -132,6 +132,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
   const [character, setCharacter] = useState(0)
   const [word, setWord] = useState(0)
   const [user, userLoading] = useAuthState(firebase.auth())
+  const [characterLimit, setCharacterLimit] = useState(0)
 
   useEffect(() => {
     (window as any).edit = quillRef.current?.getEditor();
@@ -210,8 +211,12 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     editor: UnprivilegedEditor
   ) {
     const text = editor.getText().trim()
-    setCharacter(editor.getLength() - 1)
+    const length = editor.getLength()
+    setCharacter(length - 1)
     setWord(text.length > 0 ? text.split(" ").length : 0)
+    if (characterLimit > 0 && length > characterLimit) {
+      quillRef.current?.getEditor().deleteText(characterLimit, length)
+    }
   }
 
   function onSelection(
