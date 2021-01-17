@@ -1,13 +1,18 @@
-import { Avatar, Box, Divider, HStack, Icon, Spinner, Text, VStack, Heading } from '@chakra-ui/react'
+import { Avatar, Box, Divider, HStack, Icon, Spinner, Text, VStack, Heading, useToast } from '@chakra-ui/react'
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useCollection } from "react-firebase-hooks/firestore";
 import { useEffect, useState } from 'react'
 import { VscAdd, VscSearch } from 'react-icons/vsc'
 import { IoEllipsisVerticalSharp } from 'react-icons/io5'
 import { Path } from './App'
 import firebase from "./fire";
 import { Link, useHistory } from 'react-router-dom';
+import Sheet from "react-modal-sheet";
 import dayjs from 'dayjs';
-import New from './New';
+import New, { Button } from './New';
+import { duration } from './Setting';
+import { copyWithId } from './Export';
+import { AiOutlineCopy, AiOutlineDelete, AiOutlineStar } from 'react-icons/ai';
 
 export const padding = "1.1rem"
 export const maxWidth = "800px"
@@ -60,15 +65,18 @@ function Files({ path, active }: FilesProps) {
   const [user] = useAuthState(firebase.auth())
   const [list, setList] = useState<any>([]);
 
+  let query = firebase.firestore().collection("drafts")
+    .where("users", "array-contains", user?.uid || "123")
+  if (path !== Path.HOME && path !== Path.RECENT) {
+    query = query.where(path === Path.FAVORITES ? "favorite" : "shared", "==", true)
+  }
+  const [snapshot] = useCollection(query)
+
   useEffect(() => {
-    if (!user) return
-    let query = firebase.firestore().collection("drafts")
-      .where("users", "array-contains", user.uid)
-    if (path !== Path.HOME && path !== Path.RECENT) {
-      query = query.where(Path.FAVORITES ? "favorite" : "shared", "==", true)
+    if (user && snapshot) {
+      setList(snapshot.docs)
     }
-    query.get().then(snapshot => setList(snapshot.docs))
-  }, [user, active, path])
+  }, [snapshot, user])
 
   return (
     <Box maxW={maxWidth} m="auto">
@@ -103,40 +111,112 @@ type ListProps = {
 }
 
 function FileList({ list }: ListProps) {
+  const margin = "2rem"
   const history = useHistory()
+  const toast = useToast()
+  const [option, setOption] = useState("")
   list = list.map(doc => ({ id: doc.id, ...doc.data() }))
 
   return (
-    <Box>
-      {list.map((draft, index) => (
-        <Box mb="0.7rem" cursor="pointer" key={draft.id} onClick={() => open(draft.id)}>
-          <HStack justify="space-between" mb="0.5rem">
-            <HStack>
-              <Icon viewBox="0 0 1024 1024" h="8" w="8" mr="1rem">
-                <path d="M789.4 223.4h177.4v732.2c0 37.8-28.8 66.6-66.6 66.6H190.4c-37.8 0-66.6-28.8-66.6-66.6V68.4c0-37.8 28.8-66.6 66.6-66.6h554.7v177.4h44.5v44.2h-0.2z m-66.7-22.1V23.9H190.4c-24.5 0-44.5 20-44.5 44.5v887.2c0 24.5 20 44.5 44.5 44.5h709.8c24.5 0 44.5-20 44.5-44.5V245.5H767.3V201h-44.5l-0.1 0.3z" fill="#9FA0A6" p-id="5785"></path><path d="M212.5 889H878v44.5H212.5zM212.5 778.2H878v44.5H212.5zM212.5 667H878v44.5H212.5z" fill="#9FA0A6" p-id="5786"></path><path d="M101.7 112.6h354.9c24.5 0 44.5 20 44.5 44.5V512c0 24.5-20 44.5-44.5 44.5H101.7c-24.5 0-44.5-20-44.5-44.5V156.8c0-24.2 20-44.2 44.5-44.2z" fill="#05C1E0" p-id="5787"></path><path d="M254.3 459.9V271c0-3.9-3-7-7-7h-58.7c-3.9 0-7-3-7-7v-27.6c0-3.9 3-7 7-7h180.2c3.9 0 7 3 7 7V257c0 3.9-3 7-7 7h-58.4c-3.9 0-7 3-7 7v188.9c0 3.9-3 7-7 7H261c-3.7-0.3-6.7-3.3-6.7-7z" fill="#FFFFFF" p-id="5788"></path>
-              </Icon>
-              <VStack spacing="0" align="left">
-                <Text >{draft.title}</Text>
-                <Text color="GrayText" fontSize="0.8rem" >
-                  {draft.words} words
+    <>
+      <Box>
+        {list.map((draft, index) => (
+          <Box mb="0.7rem" cursor="pointer" key={draft.id} onClick={() => open(draft.id)}>
+            <HStack justify="space-between" mb="0.5rem">
+              <HStack>
+                <Icon viewBox="0 0 1024 1024" h="8" w="8" mr="1rem">
+                  <path d="M789.4 223.4h177.4v732.2c0 37.8-28.8 66.6-66.6 66.6H190.4c-37.8 0-66.6-28.8-66.6-66.6V68.4c0-37.8 28.8-66.6 66.6-66.6h554.7v177.4h44.5v44.2h-0.2z m-66.7-22.1V23.9H190.4c-24.5 0-44.5 20-44.5 44.5v887.2c0 24.5 20 44.5 44.5 44.5h709.8c24.5 0 44.5-20 44.5-44.5V245.5H767.3V201h-44.5l-0.1 0.3z" fill="#9FA0A6" p-id="5785"></path><path d="M212.5 889H878v44.5H212.5zM212.5 778.2H878v44.5H212.5zM212.5 667H878v44.5H212.5z" fill="#9FA0A6" p-id="5786"></path><path d="M101.7 112.6h354.9c24.5 0 44.5 20 44.5 44.5V512c0 24.5-20 44.5-44.5 44.5H101.7c-24.5 0-44.5-20-44.5-44.5V156.8c0-24.2 20-44.2 44.5-44.2z" fill="#05C1E0" p-id="5787"></path><path d="M254.3 459.9V271c0-3.9-3-7-7-7h-58.7c-3.9 0-7-3-7-7v-27.6c0-3.9 3-7 7-7h180.2c3.9 0 7 3 7 7V257c0 3.9-3 7-7 7h-58.4c-3.9 0-7 3-7 7v188.9c0 3.9-3 7-7 7H261c-3.7-0.3-6.7-3.3-6.7-7z" fill="#FFFFFF" p-id="5788"></path>
+                </Icon>
+                <VStack spacing="0" align="left">
+                  <Text >{draft.title}</Text>
+                  <Text color="GrayText" fontSize="0.8rem" >
+                    {draft.words} words
                   <span> {dayjs(draft.last_open.toDate()).format("DD MMM YYYY")}</span>
-                </Text>
-              </VStack>
+                  </Text>
+                </VStack>
+              </HStack>
+              <Icon as={IoEllipsisVerticalSharp} color="GrayText" w="5" h="5" onClick={(e) => { setOption(draft.id); e.stopPropagation() }} />
             </HStack>
-            <Icon as={IoEllipsisVerticalSharp} color="GrayText" w="5" h="5" onClick={(e) => { option(draft.id); e.stopPropagation() }} />
-          </HStack>
-          <Divider hidden={index === list.length - 1} />
-        </Box>
-      ))}
-    </Box>
+            <Divider hidden={index === list.length - 1} />
+          </Box>
+        ))}
+      </Box>
+      <Sheet isOpen={option !== ""} snapPoints={[450]} onClose={() => setOption("")}>
+        <Sheet.Container>
+          <Sheet.Header />
+          <Sheet.Content>
+            <VStack mt="1rem" align="left" spacing="1.4rem" color="GrayText">
+              <Text ml={margin} mr={margin} fontWeight="500">New Draft</Text>
+              <Divider />
+              <VStack pl={margin} pr={margin} align="left">
+                <Button click={favoriteClick} icon={AiOutlineStar} text="Add as favorite" />
+                <Button click={copyClick} icon={AiOutlineCopy} text="Copy Text" />
+                <Button click={deleteClick} icon={AiOutlineDelete} text="Delete draft" />
+              </VStack>
+            </VStack>
+          </Sheet.Content>
+        </Sheet.Container>
+        <Sheet.Backdrop onTap={() => setOption("")} />
+      </Sheet >
+    </>
   )
+
+  function deleteClick() {
+    firebase.firestore().collection("drafts").doc(option).delete().then(() => {
+      toast({
+        title: "Draft deleted",
+        status: "warning",
+        duration: duration,
+        isClosable: true
+      })
+    }).catch(() => {
+      toast({
+        title: "Delete failed",
+        description: "Something wrong. Please try again",
+        status: "error",
+        duration: duration,
+        isClosable: true
+      })
+    })
+    setOption("")
+  }
+
+  function favoriteClick() {
+    firebase.firestore().collection("drafts").doc(option).update({
+      "favorite": true
+    }).then(() => {
+      toast({
+        title: "Added to favorites",
+        status: "success",
+        duration: duration,
+        isClosable: true
+      })
+    }).catch(() => {
+      toast({
+        title: "Favorite failed",
+        description: "Something wrong. Please try again",
+        status: "error",
+        duration: duration,
+        isClosable: true
+      })
+    })
+    setOption("")
+  }
+
+  function copyClick() {
+    copyWithId(option).then(() => {
+      toast({
+        title: "Text Copied",
+        status: "success",
+        duration: duration,
+        isClosable: true
+      })
+    })
+    setOption("")
+  }
 
   function open(id: string) {
     history.push(Path.DRAFT + "/" + id)
-  }
-
-  function option(id: string) {
-    console.log("option" + id)
   }
 }
 

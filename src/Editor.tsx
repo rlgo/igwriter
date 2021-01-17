@@ -63,7 +63,8 @@ function Bottom({ id, open, setOpen, editor }: BottomProps) {
         toast({
           title: "Text Copied",
           status: "success",
-          duration: duration
+          duration: duration,
+          isClosable: true
         })
       })
     }

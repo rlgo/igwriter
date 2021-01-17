@@ -5,6 +5,10 @@ const actions = {
   "strike": strike
 }
 
+export function copyWithId(id) {
+  return navigator.clipboard.writeText(id)
+}
+
 export function copy(editor) {
   const contents = editor.getContents()
   const text = contents.map(op => {

@@ -1,10 +1,11 @@
 import { Box, HStack, Icon, Text, VStack } from '@chakra-ui/react'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { IoArrowBackSharp, IoEllipsisVerticalSharp } from 'react-icons/io5'
 import { Link, useParams } from 'react-router-dom'
 import { padding, maxWidth } from './Page'
 import firebase from "./fire";
 import Editor from './Editor'
+import { useDocument } from 'react-firebase-hooks/firestore'
 
 type TopbarProps = {
   name: string,
