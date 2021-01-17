@@ -14,6 +14,13 @@ import { VscGitPullRequest, VscSettings } from "react-icons/vsc";
 import { IoShareSocialOutline } from "react-icons/io5";
 import { maxWidth } from "./Page";
 import { duration } from "./Setting";
+import * as Y from 'yjs'
+import { WebrtcProvider } from 'y-webrtc'
+import { WebsocketProvider } from 'y-websocket'
+import { IndexeddbPersistence } from 'y-indexeddb'
+import { QuillBinding } from 'y-quill'
+import { useAuthState } from "react-firebase-hooks/auth";
+import firebase from "./fire";
 
 const grey = "#6E6E6E"
 
@@ -36,6 +43,7 @@ type BottomProps = {
 function Bottom({ id, open, setOpen, editor }: BottomProps) {
   const margin = "2rem"
   const toast = useToast()
+
   return (
     <Sheet isOpen={open} snapPoints={[450]} onClose={() => setOpen(false)}>
       <Sheet.Container>
@@ -114,7 +122,7 @@ type Style = "bold" | "italic" | "underline" | "strike" | "none"
 type EditorProps = {
   id: string,
   open: boolean,
-  setOpen: (open: boolean) => void
+  setOpen: (open: boolean) => void,
 }
 
 export default function Editor({ id, open, setOpen }: EditorProps) {
@@ -123,11 +131,29 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
   const [style, setStyle] = useState<Style>("none")
   const [character, setCharacter] = useState(0)
   const [word, setWord] = useState(0)
+  const [user, userLoading] = useAuthState(firebase.auth())
 
   useEffect(() => {
     (window as any).edit = quillRef.current?.getEditor();
     (window as any).ref = quillRef;
-  }, [quillRef])
+    if (!id || userLoading || !quillRef) return
+    const editor = quillRef.current?.getEditor()
+    const ydoc = new Y.Doc()
+    const type = ydoc.getText(id)
+    new IndexeddbPersistence(id, ydoc)
+    const webrtcProvider = new WebrtcProvider(id, ydoc)
+    webrtcProvider.connect()
+    new QuillBinding(type, editor, webrtcProvider.awareness)
+    webrtcProvider.awareness.setLocalStateField('user', {
+      name: user?.displayName,
+      color: 'blue'
+    })
+    return () => {
+      if (webrtcProvider.connected)
+        webrtcProvider.disconnect()
+      webrtcProvider.destroy()
+    }
+  }, [quillRef, id, user, userLoading])
 
   Quill.import("delta")
   Quill.register("modules/cursors", QuillCursors)
@@ -136,7 +162,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     : <>
       <VStack maxW={maxWidth} w="100%" h="100%" spacing="0">
         <HStack w="100%" justify="space-between">
-          <HStack p="0.5rem" spacing="0">
+          <HStack p="0.5rem" pb="0" spacing="0">
             <Button icon={AiOutlineBold} active={style === "bold"} onclick={() => click("bold")} />
             <Button icon={AiOutlineItalic} active={style === "italic"} onclick={() => click("italic")} />
             <Button icon={AiOutlineUnderline} active={style === "underline"} onclick={() => click("underline")} />
