@@ -12,6 +12,7 @@
 
 # production
 /build
+/dbDir
 
 # misc
 .DS_Store

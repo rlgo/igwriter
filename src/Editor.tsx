@@ -143,8 +143,10 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     new IndexeddbPersistence(id, ydoc)
     const webrtcProvider = new WebrtcProvider(id, ydoc)
     webrtcProvider.connect()
-    new QuillBinding(type, editor, webrtcProvider.awareness)
-    webrtcProvider.awareness.setLocalStateField('user', {
+    const websocketProvider = new WebsocketProvider("ws://localhost:1234", id, ydoc)
+    websocketProvider.connect()
+    new QuillBinding(type, editor, websocketProvider.awareness)
+    websocketProvider.awareness.setLocalStateField('user', {
       name: user?.displayName,
       color: 'blue'
     })
@@ -152,6 +154,9 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
       if (webrtcProvider.connected)
         webrtcProvider.disconnect()
       webrtcProvider.destroy()
+      if (websocketProvider.wsconnected)
+        websocketProvider.disconnect()
+      websocketProvider.destroy()
     }
   }, [quillRef, id, user, userLoading])
 
