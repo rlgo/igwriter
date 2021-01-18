@@ -212,6 +212,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     const editor = quillRef.current?.getEditor()
     const ydoc = new Y.Doc()
     const type = ydoc.getText(id)
+    const name = user?.isAnonymous ? "Guest" : user?.displayName
     new IndexeddbPersistence(id, ydoc)
     const webrtcProvider = new WebrtcProvider(id, ydoc)
     webrtcProvider.connect()
@@ -219,7 +220,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     websocketProvider.connect()
     new QuillBinding(type, editor, websocketProvider.awareness)
     websocketProvider.awareness.setLocalStateField('user', {
-      name: user?.displayName,
+      name: name,
       color: 'blue'
     })
     return () => {
