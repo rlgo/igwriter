@@ -165,7 +165,7 @@ function FileList({ list }: ListProps) {
     firebase.firestore().collection("drafts").doc(option).delete().then(() => {
       toast({
         title: "Draft deleted",
-        status: "warning",
+        status: "error",
         duration: duration,
         isClosable: true
       })

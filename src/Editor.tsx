@@ -99,7 +99,7 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
               <VStack pl={margin} pr={marginLarge} align="left" fontSize="1rem" spacing={margin}>
                 <HStack spacing={marginLarge}>
                   <Text w="30%">Character Limit</Text>
-                  <Input ref={characterRef} isInvalid={invalid} size="sm" value={characterLimit} type="number" onChange={limitChange} w="50%" />
+                  <Input ref={characterRef} isInvalid={invalid} size="sm" defaultValue={characterLimit} type="number" onChange={limitChange} w="50%" />
                 </HStack>
                 <HStack spacing={marginLarge}>
                   <Text w="30%">Hard Limit</Text>
@@ -116,6 +116,14 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
   )
 
   function applyClick() {
+    if (invalid) {
+      return toast({
+        title: "Invalid input",
+        duration: duration,
+        isClosable: true,
+        status: "error"
+      })
+    }
     //@ts-ignore
     let character = characterRef?.current.value
     //@ts-ignore
@@ -125,6 +133,7 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
       characterLimit: character,
       hardLimit: hard
     })
+    setPage(false)
   }
 
   function copyClick() {
@@ -276,7 +285,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     const text = editor.getText().trim()
     const length = editor.getLength()
     //@ts-ignore
-    const characterLimit = data.characterLimit
+    const characterLimit = data?.characterLimit
     setCharacter(length - 1)
     setWord(text.length > 0 ? text.split(" ").length : 0)
     if (characterLimit && characterLimit > 0 && length > characterLimit) {
