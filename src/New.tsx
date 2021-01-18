@@ -98,7 +98,6 @@ export default function New({ open, setOpen }: NewProps) {
         .where("users", "array-contains", user.uid)
         .onSnapshot(snapshot => {
           unsubscribe()
-          debugger
           const last = snapshot.docs.shift()
           history.push(Path.DRAFT + "/" + last?.id)
         })

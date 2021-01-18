@@ -214,21 +214,23 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
   useEffect(() => {
     (window as any).edit = quillRef.current?.getEditor();
     (window as any).ref = quillRef;
-    if (!id || userLoading || !quillRef) return
+    if (!id || userLoading || !quillRef || !user) return
+
     const editor = quillRef.current?.getEditor()
     const ydoc = new Y.Doc()
     const type = ydoc.getText(id)
     const name = user?.isAnonymous ? "Guest" : user?.displayName
     new IndexeddbPersistence(id, ydoc)
+    const websocketProvider = new WebsocketProvider("ws://rlgo.duckdns.org:6393", id, ydoc)
+    websocketProvider.connect()
     const webrtcProvider = new WebrtcProvider(id, ydoc)
     webrtcProvider.connect()
-    const websocketProvider = new WebsocketProvider("ws://localhost:1234", id, ydoc)
-    websocketProvider.connect()
     new QuillBinding(type, editor, websocketProvider.awareness)
     websocketProvider.awareness.setLocalStateField('user', {
       name: name,
       color: 'blue'
     })
+
     return () => {
       if (webrtcProvider.connected)
         webrtcProvider.disconnect()
@@ -238,6 +240,14 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
       websocketProvider.destroy()
     }
   }, [quillRef, id, user, userLoading])
+
+  useEffect(() => {
+    if (user) {
+      firebase.firestore().collection("drafts").doc(id).update({
+        users: firebase.firestore.FieldValue.arrayUnion(user.uid)
+      })
+    }
+  }, [id, user])
 
   Quill.import("delta")
   Quill.register("modules/cursors", QuillCursors)
