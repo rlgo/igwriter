@@ -75,18 +75,20 @@ export default function New({ open, setOpen }: NewProps) {
   async function add(text: string) {
     if (!user) return
 
-    const unsubscribe = firebase.firestore().collection("drafts")
-      .where("users", "array-contains", user.uid)
-      .onSnapshot(snapshot => {
-        unsubscribe()
-        const last = snapshot.docs.pop()
-        history.push(Path.DRAFT + "/" + last?.id)
-      })
     firebase.firestore().collection("drafts").add({
       title: "Untitled",
       users: [user.uid],
       words: 0,
       last_open: new Date()
+    }).then(() => {
+      const unsubscribe = firebase.firestore().collection("drafts")
+        .where("users", "array-contains", user.uid)
+        .onSnapshot(snapshot => {
+          unsubscribe()
+          debugger
+          const last = snapshot.docs.shift()
+          history.push(Path.DRAFT + "/" + last?.id)
+        })
     })
   }
 }
