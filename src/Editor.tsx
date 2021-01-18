@@ -4,10 +4,10 @@ import * as _Quill from "quill";
 import QuillCursors from "quill-cursors"
 import { Quill as QuillEditor } from "react-quill"
 import 'react-quill/dist/quill.snow.css'
-import { VStack, Icon, Box, HStack, Divider, Text, useToast, Input, Switch, Button as CButton } from "@chakra-ui/react"
+import { VStack, Icon, Box, HStack, Divider, Text, useToast, Input, Switch, Button as CButton, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from "@chakra-ui/react"
 import { IconType } from "react-icons"
 import Sheet from "react-modal-sheet"
-import { AiOutlineBold, AiOutlineCopy, AiOutlineItalic, AiOutlineStrikethrough, AiOutlineUnderline } from "react-icons/ai"
+import { AiOutlineBold, AiOutlineCopy, AiOutlineEdit, AiOutlineItalic, AiOutlineStrikethrough, AiOutlineUnderline } from "react-icons/ai"
 import { copy } from "./Export"
 import { Button as SheetButton } from "./New"
 import { VscGitPullRequest, VscSettings } from "react-icons/vsc";
@@ -51,8 +51,10 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
   const [invalid, setInvalid] = useState(false)
   const [characterLimit, setCharacterLimit] = useState(limit)
   const [hardLimit, setHardLimit] = useState(limitHard)
+  const [renameModal, setRenameModal] = useState(false)
   const characterRef = useRef(null)
   const hardRef = useRef(null)
+  const nameRef = useRef(null)
 
   const limitChange: ChangeEventHandler = event => {
     //@ts-ignore
@@ -80,9 +82,10 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
               <Divider />
               <VStack pl={margin} pr={margin} align="left">
                 <SheetButton click={copyClick} icon={AiOutlineCopy} text="Copy Text" />
+                <SheetButton click={renameClick} icon={AiOutlineEdit} text="Rename Title" />
                 <SheetButton hidden={!navigator.share} click={shareClick} icon={IoShareSocialOutline} text="Share with link" />
                 <SheetButton click={versionClick} icon={VscGitPullRequest} text="Version History" />
-                <SheetButton click={setup} icon={VscSettings} text="Page Setup" />
+                <SheetButton click={setupClick} icon={VscSettings} text="Page Setup" />
               </VStack>
             </VStack>
           </Sheet.Content>
@@ -112,6 +115,22 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
         </Sheet.Container>
         <Sheet.Backdrop onTap={() => setPage(false)} />
       </Sheet>
+      <Modal isCentered={true} isOpen={renameModal} onClose={() => setRenameModal(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Rename Draft</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Input ref={nameRef} placeholder="Draft title" />
+          </ModalBody>
+          <ModalFooter>
+            <CButton colorScheme="blue" mr={3} onClick={() => renameApplyClick()}>
+              Apply
+            </CButton>
+            <CButton variant="ghost" onClick={() => setRenameModal(false)}>Cancel</CButton>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   )
 
@@ -161,12 +180,30 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
     setOpen(false)
   }
 
+  function renameClick() {
+    setOpen(false)
+    setRenameModal(true)
+  }
+
+  function renameApplyClick() {
+    if (nameRef) {
+      // @ts-ignore
+      const name = nameRef.current?.value
+      if (name.length > 0) {
+        firebase.firestore().collection("drafts").doc(id).update({
+          title: name
+        })
+      } else return
+    }
+    setRenameModal(false)
+  }
+
   function versionClick() {
 
     setOpen(false)
   }
 
-  function setup() {
+  function setupClick() {
     setPage(true)
     setOpen(false)
   }
@@ -315,6 +352,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     source: _Quill.Sources,
     editor: UnprivilegedEditor
   ) {
+    if (open) return
     const formats = quillRef.current?.getEditor().getFormat()
     const keys = Object.keys(formats || {})
     if (keys.length > 0) {
