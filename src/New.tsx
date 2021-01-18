@@ -8,11 +8,16 @@ import Sheet from "react-modal-sheet";
 import { useHistory } from "react-router-dom";
 import { Path } from "./App";
 
-type ButtonProps = { click: MouseEventHandler, icon: IconType, text: string }
+type ButtonProps = {
+  click: MouseEventHandler,
+  icon: IconType,
+  text: string,
+  hidden?: boolean
+}
 
-export function Button({ click, icon, text }: ButtonProps) {
+export function Button({ click, icon, text, hidden }: ButtonProps) {
   return (
-    <HStack onClick={click} spacing="1.5rem" pt="1rem" pb="1rem" cursor="pointer">
+    <HStack onClick={click} spacing="1.5rem" pt="1rem" pb="1rem" cursor="pointer" hidden={hidden}>
       <Icon as={icon} w={6} h={6} />
       <Text>{text}</Text>
     </HStack>

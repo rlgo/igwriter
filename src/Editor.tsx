@@ -80,7 +80,7 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
               <Divider />
               <VStack pl={margin} pr={margin} align="left">
                 <SheetButton click={copyClick} icon={AiOutlineCopy} text="Copy Text" />
-                <SheetButton click={shareClick} icon={IoShareSocialOutline} text="Share with link" />
+                <SheetButton hidden={!navigator.share} click={shareClick} icon={IoShareSocialOutline} text="Share with link" />
                 <SheetButton click={versionClick} icon={VscGitPullRequest} text="Version History" />
                 <SheetButton click={setup} icon={VscSettings} text="Page Setup" />
               </VStack>
@@ -129,7 +129,6 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
     //@ts-ignore
     const hard = hardRef?.current.checked
     firebase.firestore().collection("drafts").doc(id).update({
-      id: id,
       characterLimit: character,
       hardLimit: hard
     })
@@ -151,7 +150,14 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
   }
 
   function shareClick() {
-
+    navigator.share({
+      title: "Edit collaboratively at igwriter",
+      url: window.location.href
+    }).then(() => {
+      firebase.firestore().collection("drafts").doc(id).update({
+        shared: true
+      })
+    })
     setOpen(false)
   }
 
