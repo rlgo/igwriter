@@ -1,10 +1,10 @@
-import React, { MouseEventHandler, useEffect, useRef, useState } from "react"
+import React, { ChangeEventHandler, MouseEventHandler, useEffect, useRef, useState } from "react"
 import ReactQuill, { Quill } from "react-quill"
 import * as _Quill from "quill";
 import QuillCursors from "quill-cursors"
 import { Quill as QuillEditor } from "react-quill"
 import 'react-quill/dist/quill.snow.css'
-import { VStack, Icon, Box, HStack, Divider, Text, useToast } from "@chakra-ui/react"
+import { VStack, Icon, Box, HStack, Divider, Text, useToast, Input, Switch, Button as CButton } from "@chakra-ui/react"
 import { IconType } from "react-icons"
 import Sheet from "react-modal-sheet"
 import { AiOutlineBold, AiOutlineCopy, AiOutlineItalic, AiOutlineStrikethrough, AiOutlineUnderline } from "react-icons/ai"
@@ -21,6 +21,7 @@ import { IndexeddbPersistence } from 'y-indexeddb'
 import { QuillBinding } from 'y-quill'
 import { useAuthState } from "react-firebase-hooks/auth";
 import firebase from "./fire";
+import { useDocumentData } from "react-firebase-hooks/firestore";
 
 const grey = "#6E6E6E"
 
@@ -37,33 +38,94 @@ type BottomProps = {
   id: string
   open: boolean
   setOpen: (open: boolean) => void
-  editor?: QuillEditor
+  editor?: QuillEditor,
+  limit?: number,
+  limitHard?: boolean
 }
 
-function Bottom({ id, open, setOpen, editor }: BottomProps) {
+function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
   const margin = "2rem"
+  const marginLarge = "4rem"
   const toast = useToast()
+  const [page, setPage] = useState(false)
+  const [invalid, setInvalid] = useState(false)
+  const [characterLimit, setCharacterLimit] = useState(limit)
+  const [hardLimit, setHardLimit] = useState(limitHard)
+  const characterRef = useRef(null)
+  const hardRef = useRef(null)
+
+  const limitChange: ChangeEventHandler = event => {
+    //@ts-ignore
+    const value: number = event.target.value
+    setCharacterLimit(value)
+    if (value > 0 && value < 1000000)
+      setInvalid(false)
+    else setInvalid(true)
+  }
+
+  const hardlimitChange: ChangeEventHandler = event => {
+    //@ts-ignore
+    const value: boolean = event.target.checked
+    setHardLimit(value)
+  }
 
   return (
-    <Sheet isOpen={open} snapPoints={[450]} onClose={() => setOpen(false)}>
-      <Sheet.Container>
-        <Sheet.Header />
-        <Sheet.Content>
-          <VStack mt="1rem" align="left" spacing="1.4rem" color="GrayText">
-            <Text ml={margin} mr={margin} fontWeight="500">File actions</Text>
-            <Divider />
-            <VStack pl={margin} pr={margin} align="left">
-              <SheetButton click={copyClick} icon={AiOutlineCopy} text="Copy Text" />
-              <SheetButton click={shareClick} icon={IoShareSocialOutline} text="Share with link" />
-              <SheetButton click={versionClick} icon={VscGitPullRequest} text="Version History" />
-              <SheetButton click={setup} icon={VscSettings} text="Page Setup" />
+    <>
+      <Sheet isOpen={open} snapPoints={[450]} onClose={() => setOpen(false)}>
+        <Sheet.Container>
+          <Sheet.Header />
+          <Sheet.Content>
+            <VStack mt="1rem" align="left" spacing="1.4rem" color="GrayText">
+              <Text ml={margin} mr={margin} fontWeight="500">File actions</Text>
+              <Divider />
+              <VStack pl={margin} pr={margin} align="left">
+                <SheetButton click={copyClick} icon={AiOutlineCopy} text="Copy Text" />
+                <SheetButton click={shareClick} icon={IoShareSocialOutline} text="Share with link" />
+                <SheetButton click={versionClick} icon={VscGitPullRequest} text="Version History" />
+                <SheetButton click={setup} icon={VscSettings} text="Page Setup" />
+              </VStack>
             </VStack>
-          </VStack>
-        </Sheet.Content>
-      </Sheet.Container>
-      <Sheet.Backdrop onTap={() => setOpen(false)} />
-    </Sheet >
+          </Sheet.Content>
+        </Sheet.Container>
+        <Sheet.Backdrop onTap={() => setOpen(false)} />
+      </Sheet >
+      <Sheet isOpen={page} snapPoints={[450]} onClose={() => setPage(false)}>
+        <Sheet.Container>
+          <Sheet.Header />
+          <Sheet.Content>
+            <VStack mt="1rem" align="left" spacing="1.4rem" color="GrayText">
+              <Text ml={margin} mr={margin} fontWeight="500">Page setup</Text>
+              <Divider />
+              <VStack pl={margin} pr={marginLarge} align="left" fontSize="1rem" spacing={margin}>
+                <HStack spacing={marginLarge}>
+                  <Text w="30%">Character Limit</Text>
+                  <Input ref={characterRef} isInvalid={invalid} size="sm" value={characterLimit} type="number" onChange={limitChange} w="50%" />
+                </HStack>
+                <HStack spacing={marginLarge}>
+                  <Text w="30%">Hard Limit</Text>
+                  <Switch ref={hardRef} defaultChecked={hardLimit} onChange={hardlimitChange} />
+                </HStack>
+                <CButton colorScheme="blue" onClick={applyClick}>Apply</CButton>
+              </VStack>
+            </VStack>
+          </Sheet.Content>
+        </Sheet.Container>
+        <Sheet.Backdrop />
+      </Sheet>
+    </>
   )
+
+  function applyClick() {
+    //@ts-ignore
+    let character = characterRef?.current.value
+    //@ts-ignore
+    const hard = hardRef?.current.checked
+    firebase.firestore().collection("drafts").doc(id).update({
+      id: id,
+      characterLimit: character,
+      hardLimit: hard
+    })
+  }
 
   function copyClick() {
     if (editor) {
@@ -90,7 +152,7 @@ function Bottom({ id, open, setOpen, editor }: BottomProps) {
   }
 
   function setup() {
-
+    setPage(true)
     setOpen(false)
   }
 }
@@ -132,7 +194,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
   const [character, setCharacter] = useState(0)
   const [word, setWord] = useState(0)
   const [user, userLoading] = useAuthState(firebase.auth())
-  const [characterLimit, setCharacterLimit] = useState(0)
+  const [data] = useDocumentData(firebase.firestore().collection("drafts").doc(id))
 
   useEffect(() => {
     (window as any).edit = quillRef.current?.getEditor();
@@ -188,7 +250,8 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
           onChangeSelection={onSelection}
           onChange={onChange} />
       </VStack>
-      <Bottom id={id} editor={quillRef.current?.getEditor()} open={open} setOpen={setOpen} />
+      {/* @ts-ignore */}
+      <Bottom id={id} editor={quillRef.current?.getEditor()} open={open} setOpen={setOpen} characterLimit={data?.characterLimit} limitHard={data?.hardLimit} />
     </>
 
   function click(type: Style) {
@@ -212,9 +275,11 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
   ) {
     const text = editor.getText().trim()
     const length = editor.getLength()
+    //@ts-ignore
+    const characterLimit = data.characterLimit
     setCharacter(length - 1)
     setWord(text.length > 0 ? text.split(" ").length : 0)
-    if (characterLimit > 0 && length > characterLimit) {
+    if (characterLimit && characterLimit > 0 && length > characterLimit) {
       quillRef.current?.getEditor().deleteText(characterLimit, length)
     }
   }
