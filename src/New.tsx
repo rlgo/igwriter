@@ -1,12 +1,14 @@
-import { Text, HStack, VStack, Icon, Divider } from "@chakra-ui/react";
+import { Text, HStack, VStack, Icon, Divider, useToast } from "@chakra-ui/react";
 import firebase from "firebase";
-import React, { MouseEventHandler } from "react";
+import React, { MouseEventHandler, useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { IconType } from "react-icons";
 import { AiOutlineFileText, AiOutlineFileWord, AiOutlineFilePdf, AiOutlineFileImage } from "react-icons/ai";
 import Sheet from "react-modal-sheet";
 import { useHistory } from "react-router-dom";
 import { Path } from "./App";
+import { useFilePicker } from "react-sage";
+import { duration } from "./Setting";
 
 type ButtonProps = {
   click: MouseEventHandler,
@@ -33,6 +35,24 @@ export default function New({ open, setOpen }: NewProps) {
   const history = useHistory()
   const [user] = useAuthState(firebase.auth())
   const margin = "2rem"
+  const { files, onClick, errors, HiddenFileInput } = useFilePicker({ maxFileSize: 10 })
+  const toast = useToast()
+
+  useEffect(() => {
+    console.log(files)
+    debugger
+  }, [files])
+
+  useEffect(() => {
+    if (errors.hasInvalidFileSize) {
+      toast({
+        title: "File too large",
+        status: "error",
+        duration: duration,
+        isClosable: true
+      })
+    }
+  }, [errors, toast])
 
   return (
     <Sheet isOpen={open} snapPoints={[450]} onClose={() => setOpen(false)}>
@@ -43,10 +63,11 @@ export default function New({ open, setOpen }: NewProps) {
             <Text ml={margin} mr={margin} fontWeight="500">New Draft</Text>
             <Divider />
             <VStack pl={margin} pr={margin} align="left">
-              <Button click={text} icon={AiOutlineFileText} text="Create empty draft" />
-              <Button click={word} icon={AiOutlineFileWord} text="Import a Word document" />
-              <Button click={pdf} icon={AiOutlineFilePdf} text="Import a PDF file" />
+              <Button click={text} icon={AiOutlineFileText} text="Create an empty draft" />
+              <Button click={onClick} icon={AiOutlineFileWord} text="Import a Word document" />
+              <Button click={onClick} icon={AiOutlineFilePdf} text="Import a PDF file" />
               <Button click={ocr} icon={AiOutlineFileImage} text="OCR an image" />
+              <HiddenFileInput accept=".docx, .pdf" multiple={false} />
             </VStack>
           </VStack>
         </Sheet.Content>
@@ -58,14 +79,6 @@ export default function New({ open, setOpen }: NewProps) {
   function text() {
     setOpen(false)
     add("")
-  }
-
-  function word() {
-
-  }
-
-  function pdf() {
-
   }
 
   function ocr() {
