@@ -110,7 +110,7 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
             </VStack>
           </Sheet.Content>
         </Sheet.Container>
-        <Sheet.Backdrop />
+        <Sheet.Backdrop onTap={() => setPage(false)} />
       </Sheet>
     </>
   )
