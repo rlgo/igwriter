@@ -258,7 +258,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     const type = ydoc.getText(id)
     const name = user?.isAnonymous ? "Guest" : user?.displayName
     new IndexeddbPersistence(id, ydoc)
-    const websocketProvider = new WebsocketProvider("ws://rlgo.duckdns.org:6393", id, ydoc)
+    const websocketProvider = new WebsocketProvider("wss://rlgo.duckdns.org:6393", id, ydoc)
     websocketProvider.connect()
     const webrtcProvider = new WebrtcProvider(id, ydoc)
     webrtcProvider.connect()
