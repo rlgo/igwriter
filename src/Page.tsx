@@ -41,7 +41,9 @@ function Topbar({ path }: TopbarProps) {
           </HStack>
           <HStack spacing={spacing}>
             <Icon cursor="pointer" as={VscAdd} w={6} h={6} color="white" onClick={() => setOpen(true)} />
-            <Icon cursor="pointer" as={VscSearch} w={6} h={6} color="white" className="flip" />
+            <Link to="/search">
+              <Icon cursor="pointer" as={VscSearch} w={6} h={6} color="white" className="flip" />
+            </Link>
           </HStack>
         </HStack>
       </Box>
@@ -130,8 +132,8 @@ function FileList({ list }: ListProps) {
                 <VStack spacing="0" align="left">
                   <Text >{draft.title}</Text>
                   <Text color="GrayText" fontSize="0.8rem" >
-                    {draft.words} words
-                  <span> {dayjs(draft.last_open.toDate()).format("DD MMM YYYY")}</span>
+                    {/* <span>{draft.words} words</span> */}
+                    <span> {dayjs(draft.last_open.toDate()).format("DD MMM YYYY")}</span>
                   </Text>
                 </VStack>
               </HStack>

@@ -40,7 +40,6 @@ export default function New({ open, setOpen }: NewProps) {
 
   useEffect(() => {
     console.log(files)
-    debugger
   }, [files])
 
   useEffect(() => {

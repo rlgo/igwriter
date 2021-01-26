@@ -39,28 +39,30 @@ type BottomProps = {
   open: boolean
   setOpen: (open: boolean) => void
   editor?: QuillEditor,
-  limit?: number,
-  limitHard?: boolean
+  data?: any
 }
 
-function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
+function Bottom({ id, open, setOpen, editor, data }: BottomProps) {
   const margin = "2rem"
   const marginLarge = "4rem"
   const toast = useToast()
   const [page, setPage] = useState(false)
   const [invalid, setInvalid] = useState(false)
-  const [characterLimit, setCharacterLimit] = useState(limit)
-  const [hardLimit, setHardLimit] = useState(limitHard)
+  const [characterLimit, setCharacterLimit] = useState(0)
+  const [hardLimit, setHardLimit] = useState(false)
   const [renameModal, setRenameModal] = useState(false)
-  const characterRef = useRef(null)
-  const hardRef = useRef(null)
   const nameRef = useRef(null)
+
+  useEffect(() => {
+    setCharacterLimit(data?.characterLimit)
+    setHardLimit(data?.hardLimit)
+  }, [data])
 
   const limitChange: ChangeEventHandler = event => {
     //@ts-ignore
     const value: number = event.target.value
     setCharacterLimit(value)
-    if (value > 0 && value < 1000000) {
+    if (value >= 0 && value < 1000000) {
       if (invalid !== false) setInvalid(false)
     } else setInvalid(true)
   }
@@ -102,11 +104,11 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
               <VStack pl={margin} pr={marginLarge} align="left" fontSize="1rem" spacing={margin}>
                 <HStack spacing={marginLarge}>
                   <Text w="30%">Character Limit</Text>
-                  <Input ref={characterRef} isInvalid={invalid} size="sm" value={characterLimit} type="number" onChange={limitChange} w="50%" />
+                  <Input isInvalid={invalid} size="sm" value={characterLimit} type="number" onChange={limitChange} w="50%" />
                 </HStack>
                 <HStack spacing={marginLarge}>
                   <Text w="30%">Hard Limit</Text>
-                  <Switch ref={hardRef} checked={hardLimit} onChange={hardlimitChange} />
+                  <Switch isChecked={hardLimit} onChange={hardlimitChange} />
                 </HStack>
                 <CButton colorScheme="blue" onClick={applyClick}>Apply</CButton>
               </VStack>
@@ -143,13 +145,9 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
         status: "error"
       })
     }
-    //@ts-ignore
-    let character = characterRef?.current.value
-    //@ts-ignore
-    const hard = hardRef?.current.checked
     firebase.firestore().collection("drafts").doc(id).update({
-      characterLimit: parseInt(character),
-      hardLimit: hard
+      characterLimit: characterLimit,
+      hardLimit: hardLimit
     })
     setPage(false)
   }
@@ -242,6 +240,7 @@ type EditorProps = {
 export default function Editor({ id, open, setOpen }: EditorProps) {
   const quillRef = useRef<ReactQuill>(null)
   const [loading, setLoading] = useState(false)
+  const [exceed, setExceed] = useState(false)
   const [style, setStyle] = useState<Style>("none")
   const [character, setCharacter] = useState(0)
   const [word, setWord] = useState(0)
@@ -300,7 +299,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
             <Button icon={AiOutlineStrikethrough} active={style === "strike"} onclick={() => click("strike")} />
           </HStack>
           <HStack color={grey} mr="1rem" fontSize="0.9rem">
-            <Text>{character} characters</Text>
+            <Text color={exceed ? "tomato" : grey} fontWeight={exceed ? "bold" : "normal"}>{character} characters</Text>
             <Text>{word} words</Text>
           </HStack>
         </HStack>
@@ -314,7 +313,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
           onChange={onChange} />
       </VStack>
       {/* @ts-ignore */}
-      <Bottom id={id} editor={quillRef.current?.getEditor()} open={open} setOpen={setOpen} characterLimit={data?.characterLimit} limitHard={data?.hardLimit} />
+      <Bottom id={id} editor={quillRef.current?.getEditor()} open={open} setOpen={setOpen} data={data} />
     </>
 
   function click(type: Style) {
@@ -340,11 +339,15 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     const length = editor.getLength()
     //@ts-ignore
     const characterLimit = data?.characterLimit
+    //@ts-ignore
+    const hardLimit = data?.hardLimit
     setCharacter(length - 1)
     setWord(text.length > 0 ? text.split(" ").length : 0)
     if (characterLimit && characterLimit > 0 && length > characterLimit) {
-      quillRef.current?.getEditor().deleteText(characterLimit, length)
-    }
+      setExceed(true)
+      if (hardLimit)
+        quillRef.current?.getEditor().deleteText(characterLimit, length)
+    } else setExceed(false)
   }
 
   function onSelection(

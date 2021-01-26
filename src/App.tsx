@@ -11,6 +11,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import firebase from "./fire";
 import Draft from './Draft';
 import Setting from "./Setting";
+import Search from './Search';
 
 type HomePageProps = {
   path: Path
@@ -32,15 +33,15 @@ export enum Path {
   SHARED = "/shared",
   SEARCH = "/search",
   DRAFT = "/draft",
-  SETTING = "/setting"
+  SETTING = "/setting",
 }
 
 function App() {
-  const [auth, loading] = useAuthState(firebase.auth())
+  const [user, loading] = useAuthState(firebase.auth())
   useEffect(() => {
-    if (!auth && !loading)
+    if (!user && !loading)
       firebase.auth().signInAnonymously()
-  }, [auth, loading])
+  }, [user, loading])
 
   return (
     <Router>
@@ -58,7 +59,10 @@ function App() {
           <HomePage path={Path.RECENT} />
         </Route>
         <Route path={Path.SEARCH}>
-          <HomePage path={Path.SEARCH} />
+          {user?.uid
+            // @ts-ignore
+            ? <Search uid={user.uid} />
+            : <></>}
         </Route>
         <Route path={Path.DRAFT + "/:id"}>
           <Draft />
