@@ -149,7 +149,9 @@ function FileList({ list }: ListProps) {
               <Text ml={margin} mr={margin} fontWeight="500">New Draft</Text>
               <Divider />
               <VStack pl={margin} pr={margin} align="left">
-                <Button click={favoriteClick} icon={AiOutlineStar} text="Add as favorite" />
+                {isFavorite(option)
+                  ? <Button click={unfavoriteClick} icon={AiOutlineStar} text="Remove from favorite" />
+                  : <Button click={favoriteClick} icon={AiOutlineStar} text="Add as favorite" />}
                 <Button click={copyClick} icon={AiOutlineCopy} text="Copy Text" />
                 <Button click={deleteClick} icon={AiOutlineDelete} text="Delete draft" />
               </VStack>
@@ -160,6 +162,11 @@ function FileList({ list }: ListProps) {
       </Sheet >
     </>
   )
+
+  function isFavorite(id: string) {
+    if (!id) return false
+    return list.filter(doc => doc.id === id)[0].favorite
+  }
 
   function deleteClick() {
     firebase.firestore().collection("drafts").doc(option).delete().then(() => {
@@ -194,6 +201,28 @@ function FileList({ list }: ListProps) {
     }).catch(() => {
       toast({
         title: "Favorite failed",
+        description: "Something wrong. Please try again",
+        status: "error",
+        duration: duration,
+        isClosable: true
+      })
+    })
+    setOption("")
+  }
+
+  function unfavoriteClick() {
+    firebase.firestore().collection("drafts").doc(option).update({
+      "favorite": false
+    }).then(() => {
+      toast({
+        title: "Remove from favorites",
+        status: "warning",
+        duration: duration,
+        isClosable: true
+      })
+    }).catch(() => {
+      toast({
+        title: "Unfavorite failed",
         description: "Something wrong. Please try again",
         status: "error",
         duration: duration,

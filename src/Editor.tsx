@@ -60,9 +60,9 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
     //@ts-ignore
     const value: number = event.target.value
     setCharacterLimit(value)
-    if (value > 0 && value < 1000000)
-      setInvalid(false)
-    else setInvalid(true)
+    if (value > 0 && value < 1000000) {
+      if (invalid !== false) setInvalid(false)
+    } else setInvalid(true)
   }
 
   const hardlimitChange: ChangeEventHandler = event => {
@@ -102,11 +102,11 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
               <VStack pl={margin} pr={marginLarge} align="left" fontSize="1rem" spacing={margin}>
                 <HStack spacing={marginLarge}>
                   <Text w="30%">Character Limit</Text>
-                  <Input ref={characterRef} isInvalid={invalid} size="sm" defaultValue={characterLimit} type="number" onChange={limitChange} w="50%" />
+                  <Input ref={characterRef} isInvalid={invalid} size="sm" value={characterLimit} type="number" onChange={limitChange} w="50%" />
                 </HStack>
                 <HStack spacing={marginLarge}>
                   <Text w="30%">Hard Limit</Text>
-                  <Switch ref={hardRef} defaultChecked={hardLimit} onChange={hardlimitChange} />
+                  <Switch ref={hardRef} checked={hardLimit} onChange={hardlimitChange} />
                 </HStack>
                 <CButton colorScheme="blue" onClick={applyClick}>Apply</CButton>
               </VStack>
@@ -148,7 +148,7 @@ function Bottom({ id, open, setOpen, editor, limit, limitHard }: BottomProps) {
     //@ts-ignore
     const hard = hardRef?.current.checked
     firebase.firestore().collection("drafts").doc(id).update({
-      characterLimit: character,
+      characterLimit: parseInt(character),
       hardLimit: hard
     })
     setPage(false)
@@ -353,16 +353,16 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     editor: UnprivilegedEditor
   ) {
     if (open) return
-    const formats = quillRef.current?.getEditor().getFormat()
-    const keys = Object.keys(formats || {})
-    if (keys.length > 0) {
-      keys.forEach((val) => {
-        const style = val as Style
-        console.log(style)
-        setStyle(style)
-      })
-    } else {
-      setStyle("none")
-    }
+    try {
+      const formats = quillRef.current?.getEditor().getFormat()
+      const keys = Object.keys(formats || {})
+      if (keys.length > 0) {
+        keys.forEach((val) => {
+          const style = val as Style
+          console.log(style)
+          setStyle(style)
+        })
+      } else setStyle("none")
+    } catch (err) { console.error(err) }
   }
 }
