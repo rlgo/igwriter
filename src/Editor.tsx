@@ -21,7 +21,7 @@ import { IndexeddbPersistence } from 'y-indexeddb'
 import { QuillBinding } from 'y-quill'
 import { useAuthState } from "react-firebase-hooks/auth";
 import firebase from "./fire";
-import { useDocumentData } from "react-firebase-hooks/firestore";
+import { useDocumentData, useDocumentDataOnce } from "react-firebase-hooks/firestore";
 import { fromUint8Array, toUint8Array } from 'js-base64'
 
 const grey = "#6E6E6E"
@@ -285,23 +285,26 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
   useEffect(() => {
     return () => {
       if (!yydoc) return
-      // @ts-ignore
-      if (data?.versions) {
-        // @ts-ignore
-        const oldBase64: string = data.versions[data.versions.length - 1] || null
 
-        if (!oldBase64 || !equalYDoc(yydoc, oldBase64, id)) {
-          debugger
-          const newStateUpdate = Y.encodeStateAsUpdate(yydoc)
-          const base64State = fromUint8Array(newStateUpdate)
-          //save version
-          firebase.firestore().collection("drafts").doc(id).update({
-            versions: firebase.firestore.FieldValue.arrayUnion(base64State)
-          })
+      firebase.firestore().collection("drafts").doc(id).get().then(doc => {
+        if (doc?.data()) {
+          // @ts-ignore
+          const versions: string[] = doc?.data().versions
+          const oldBase64 = versions[versions.length - 1] || null
+
+          if (!oldBase64 || !equalYDoc(yydoc, oldBase64, id)) {
+            debugger
+            const newStateUpdate = Y.encodeStateAsUpdate(yydoc)
+            const base64State = fromUint8Array(newStateUpdate)
+            //save version
+            firebase.firestore().collection("drafts").doc(id).update({
+              versions: firebase.firestore.FieldValue.arrayUnion(base64State)
+            })
+          }
         }
-      }
+      })
     }
-  }, [id, data, yydoc])
+  }, [id, yydoc])
 
   useEffect(() => {
     return () => {
