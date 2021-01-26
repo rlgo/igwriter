@@ -91,7 +91,8 @@ export default function New({ open, setOpen }: NewProps) {
       title: "Untitled",
       users: [user.uid],
       words: 0,
-      last_open: new Date()
+      last_open: new Date(),
+      versions: []
     }).then(() => {
       const unsubscribe = firebase.firestore().collection("drafts")
         .where("users", "array-contains", user.uid)

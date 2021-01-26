@@ -19,6 +19,7 @@
     "firebase": "^8.2.2",
     "framer-motion": "^3.2.1",
     "fuse.js": "^6.4.6",
+    "js-base64": "^3.6.0",
     "jszip": "^3.5.0",
     "punycode": "^2.1.1",
     "quill-cursors": "^3.0.1",

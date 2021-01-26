@@ -22,6 +22,7 @@ import { QuillBinding } from 'y-quill'
 import { useAuthState } from "react-firebase-hooks/auth";
 import firebase from "./fire";
 import { useDocumentData } from "react-firebase-hooks/firestore";
+import { fromUint8Array, toUint8Array } from 'js-base64'
 
 const grey = "#6E6E6E"
 
@@ -38,7 +39,7 @@ type BottomProps = {
   id: string
   open: boolean
   setOpen: (open: boolean) => void
-  editor?: QuillEditor,
+  editor?: QuillEditor
   data?: any
 }
 
@@ -246,6 +247,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
   const [word, setWord] = useState(0)
   const [user, userLoading] = useAuthState(firebase.auth())
   const [data] = useDocumentData(firebase.firestore().collection("drafts").doc(id))
+  const [yydoc, setYdoc] = useState<Y.Doc | null>(null)
 
   useEffect(() => {
     (window as any).edit = quillRef.current?.getEditor();
@@ -267,6 +269,8 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
       color: 'blue'
     })
 
+    setYdoc(ydoc)
+
     return () => {
       if (webrtcProvider.connected)
         webrtcProvider.disconnect()
@@ -275,7 +279,35 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
         websocketProvider.disconnect()
       websocketProvider.destroy()
     }
-  }, [quillRef, id, user, userLoading])
+    // @ts-ignore
+  }, [quillRef, id, user, userLoading, setYdoc])
+
+  useEffect(() => {
+    return () => {
+      if (!yydoc) return
+      // @ts-ignore
+      if (data?.versions) {
+        // @ts-ignore
+        const oldBase64: string = data.versions[data.versions.length - 1] || null
+
+        if (!oldBase64 || !equalYDoc(yydoc, oldBase64, id)) {
+          debugger
+          const newStateUpdate = Y.encodeStateAsUpdate(yydoc)
+          const base64State = fromUint8Array(newStateUpdate)
+          //save version
+          firebase.firestore().collection("drafts").doc(id).update({
+            versions: firebase.firestore.FieldValue.arrayUnion(base64State)
+          })
+        }
+      }
+    }
+  }, [id, data, yydoc])
+
+  useEffect(() => {
+    return () => {
+      firebase.firestore().collection("drafts").doc(id).update({ words: word })
+    }
+  }, [word, id])
 
   useEffect(() => {
     if (user) {
@@ -362,10 +394,16 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
       if (keys.length > 0) {
         keys.forEach((val) => {
           const style = val as Style
-          console.log(style)
           setStyle(style)
         })
       } else setStyle("none")
     } catch (err) { console.error(err) }
   }
+}
+
+function equalYDoc(newDoc: Y.Doc, oldJSON: string, id: string) {
+  const oldState = toUint8Array(oldJSON)
+  const oldDoc = new Y.Doc()
+  Y.applyUpdate(oldDoc, oldState)
+  return JSON.stringify(oldDoc.getText(id).toDelta()) === JSON.stringify(newDoc.getText(id).toDelta())
 }
