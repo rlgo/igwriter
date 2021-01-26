@@ -6,6 +6,7 @@ const actions = {
 }
 
 export function copyWithId(id) {
+  // TODO: copy text with given doc id
   return navigator.clipboard.writeText(id)
 }
 
