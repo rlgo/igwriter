@@ -259,7 +259,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     const type = ydoc.getText(id)
     const name = user?.isAnonymous ? "Guest" : user?.displayName
     new IndexeddbPersistence(id, ydoc)
-    const websocketProvider = new WebsocketProvider("wss://rlgo.duckdns.org:6393", id, ydoc)
+    const websocketProvider = new WebsocketProvider("wss://rlgo.duckdns.org", id, ydoc)
     websocketProvider.connect()
     const webrtcProvider = new WebrtcProvider(id, ydoc)
     webrtcProvider.connect()
@@ -293,7 +293,6 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
           const oldBase64 = versions[versions.length - 1] || null
 
           if (!oldBase64 || !equalYDoc(yydoc, oldBase64, id)) {
-            debugger
             const newStateUpdate = Y.encodeStateAsUpdate(yydoc)
             const base64State = fromUint8Array(newStateUpdate)
             //save version
