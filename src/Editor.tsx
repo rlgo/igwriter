@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { ChangeEventHandler, MouseEventHandler, useEffect, useRef, useState } from "react"
 import ReactQuill, { Quill } from "react-quill"
 import * as _Quill from "quill";
@@ -40,10 +41,11 @@ type BottomProps = {
   open: boolean
   setOpen: (open: boolean) => void
   editor?: QuillEditor
-  data?: any
+  data?: any,
+  restore: (version: any) => void
 }
 
-function Bottom({ id, open, setOpen, editor, data }: BottomProps) {
+function Bottom({ id, open, setOpen, editor, data, restore }: BottomProps) {
   const margin = "2rem"
   const marginLarge = "4rem"
   const toast = useToast()
@@ -52,6 +54,7 @@ function Bottom({ id, open, setOpen, editor, data }: BottomProps) {
   const [characterLimit, setCharacterLimit] = useState(0)
   const [hardLimit, setHardLimit] = useState(false)
   const [renameModal, setRenameModal] = useState(false)
+  const [versionsheet, setVersionsheet] = useState(false)
   const nameRef = useRef(null)
 
   useEffect(() => {
@@ -76,6 +79,28 @@ function Bottom({ id, open, setOpen, editor, data }: BottomProps) {
 
   return (
     <>
+      <Sheet isOpen={versionsheet} snapPoints={[450]} onClose={() => setVersionsheet(false)}>
+        <Sheet.Container>
+          <Sheet.Header />
+          <Sheet.Content>
+            <VStack mt="1rem" align="left" spacing="1.4rem" color="GrayText">
+              <Text ml={margin} mr={margin} fontWeight="500">Version history</Text>
+              <Divider />
+              <VStack pl={margin} pr={margin} align="left">
+                {data?.versions
+                  .map((version, index) => { return { index: index, ...version } })
+                  .map((version, index) => (
+                    <HStack key={index} justify="space-around">
+                      <Text fontWeight="500">Version {version.index + 1}</Text>
+                      <CButton onClick={() => restore(version)}>Revert</CButton>
+                    </HStack>
+                  ))}
+              </VStack>
+            </VStack>
+          </Sheet.Content>
+        </Sheet.Container>
+        <Sheet.Backdrop onTap={() => setVersionsheet(false)} />
+      </Sheet >
       <Sheet isOpen={open} snapPoints={[450]} onClose={() => setOpen(false)}>
         <Sheet.Container>
           <Sheet.Header />
@@ -198,8 +223,8 @@ function Bottom({ id, open, setOpen, editor, data }: BottomProps) {
   }
 
   function versionClick() {
-
     setOpen(false)
+    setVersionsheet(true)
   }
 
   function setupClick() {
@@ -277,7 +302,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
         if (trim.length > 0)
           editor?.insertText(0, trim)
       }
-      firebase.firestore().collection("drafts").doc(id).set({ init: "" })
+      firebase.firestore().collection("drafts").doc(id).update({ init: "" })
     })
 
     setYdoc(ydoc)
@@ -308,7 +333,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
             const base64State = fromUint8Array(newStateUpdate)
             //save version
             firebase.firestore().collection("drafts").doc(id).update({
-              versions: firebase.firestore.FieldValue.arrayUnion(base64State)
+              versions: firebase.firestore.FieldValue.arrayUnion((base64State))
             })
           }
         }
@@ -358,8 +383,33 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
           onChange={onChange} />
       </VStack>
       {/* @ts-ignore */}
-      <Bottom id={id} editor={quillRef.current?.getEditor()} open={open} setOpen={setOpen} data={data} />
+      <Bottom id={id} editor={quillRef.current?.getEditor()} open={open} setOpen={setOpen} data={data} restore={restore} />
     </>
+
+  function restore(version: any) {
+    const reDoc = new Y.Doc()
+    Y.applyUpdate(JSON.parse((version)), reDoc)
+    const ydoc = reDoc.getText(id)
+    const delta = ydoc.toDelta()
+    quillRef.current?.getEditor().setContents(delta)
+
+    firebase.firestore().collection("drafts").doc(id).get().then(doc => {
+      if (doc?.data()) {
+        // @ts-ignore
+        const versions: string[] = doc?.data().versions
+        const oldBase64 = versions[versions.length - 1] || null
+
+        if (!oldBase64 || !equalYDoc(yydoc, oldBase64, id)) {
+          const newStateUpdate = Y.encodeStateAsUpdate(yydoc)
+          const base64State = fromUint8Array(newStateUpdate)
+          //save version
+          firebase.firestore().collection("drafts").doc(id).update({
+            versions: firebase.firestore.FieldValue.arrayUnion((base64State))
+          })
+        }
+      }
+    })
+  }
 
   function click(type: Style) {
     const editor = quillRef.current?.getEditor()
