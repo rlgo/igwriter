@@ -9,6 +9,7 @@ import { useHistory } from "react-router-dom";
 import { Path } from "./App";
 import { useFilePicker } from "react-sage";
 import { duration } from "./Setting";
+import { createWorker } from "tesseract.js";
 
 type ButtonProps = {
   click: MouseEventHandler,
@@ -39,7 +40,11 @@ export default function New({ open, setOpen }: NewProps) {
   const toast = useToast()
 
   useEffect(() => {
-    console.log(files)
+    const file = files ? files[0] : null
+    if (file) {
+      const extension = file.name.split(".").pop() || ""
+      if (["png", "jpg", "bmp"].includes(extension)) ocr(file)
+    }
   }, [files])
 
   useEffect(() => {
@@ -65,8 +70,8 @@ export default function New({ open, setOpen }: NewProps) {
               <Button click={text} icon={AiOutlineFileText} text="Create an empty draft" />
               <Button click={onClick} icon={AiOutlineFileWord} text="Import a Word document" />
               <Button click={onClick} icon={AiOutlineFilePdf} text="Import a PDF file" />
-              <Button click={ocr} icon={AiOutlineFileImage} text="OCR an image" />
-              <HiddenFileInput accept=".docx, .pdf" multiple={false} />
+              <Button click={onClick} icon={AiOutlineFileImage} text="OCR an image" />
+              <HiddenFileInput accept=".docx, .pdf, .bmp, .jpg, .png" multiple={false} />
             </VStack>
           </VStack>
         </Sheet.Content>
@@ -80,8 +85,17 @@ export default function New({ open, setOpen }: NewProps) {
     add("")
   }
 
-  function ocr() {
-
+  async function ocr(file: File) {
+    const worker = createWorker({
+      logger: m => console.log(m),
+    });
+    await worker.load();
+    await worker.loadLanguage('eng');
+    await worker.initialize('eng');
+    const { data: { text } } = await worker.recognize(file);
+    console.log(text);
+    debugger
+    await worker.terminate();
   }
 
   async function add(text: string) {
