@@ -1,5 +1,5 @@
 import { Box, HStack, Icon, Text, useToast, VStack } from '@chakra-ui/react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { IoArrowBackSharp, IoEllipsisVerticalSharp } from 'react-icons/io5'
 import { Link, useParams } from 'react-router-dom'
 import { padding, maxWidth } from './Page'
@@ -9,6 +9,7 @@ import { useDocumentData } from 'react-firebase-hooks/firestore'
 // @ts-ignore
 import useOnlineStatus from '@rehooks/online-status';
 import { duration } from './Setting'
+import debounce from "lodash.debounce";
 
 type TopbarProps = {
   name: string,
@@ -44,6 +45,18 @@ export default function Draft() {
   const online = useOnlineStatus();
   const [offlineBefore, setOfflineBefore] = useState(false)
 
+  const offlineCb = useMemo(() => {
+    const offline = () => {
+      toast({
+        title: "You are in offline mode",
+        description: "Changes will not be saved to cloud",
+        status: "info",
+        isClosable: true
+      })
+    }
+    return debounce(offline, 1000, { leading: true, trailing: false })
+  }, [toast])
+
   useEffect(() => {
     if (online) {
       if (offlineBefore) {
@@ -56,15 +69,10 @@ export default function Draft() {
       }
       setOfflineBefore(false)
     } else {
-      toast({
-        title: "You are in offline mode",
-        description: "Changes will not be saved to cloud",
-        status: "info",
-        isClosable: true
-      })
+      offlineCb()
       setOfflineBefore(true)
     }
-  }, [toast, online, offlineBefore])
+  }, [toast, online, offlineBefore, offlineCb])
 
   return (
     <VStack h="100vh" spacing="0">
