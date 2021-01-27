@@ -21,7 +21,7 @@ import { IndexeddbPersistence } from 'y-indexeddb'
 import { QuillBinding } from 'y-quill'
 import { useAuthState } from "react-firebase-hooks/auth";
 import firebase from "./fire";
-import { useDocumentData, useDocumentDataOnce } from "react-firebase-hooks/firestore";
+import { useDocumentData } from "react-firebase-hooks/firestore";
 import { fromUint8Array, toUint8Array } from 'js-base64'
 
 const grey = "#6E6E6E"
