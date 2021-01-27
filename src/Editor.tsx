@@ -268,7 +268,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
       name: name,
       color: 'blue'
     })
-    
+
     firebase.firestore().collection("drafts").doc(id).get().then(doc => {
       if (doc?.data()) {
         // @ts-ignore
@@ -277,6 +277,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
         if (trim.length > 0)
           editor?.insertText(0, trim)
       }
+      firebase.firestore().collection("drafts").doc(id).set({ init: "" })
     })
 
     setYdoc(ydoc)
