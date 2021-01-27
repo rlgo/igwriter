@@ -44,6 +44,7 @@ export default function New({ open, setOpen }: NewProps) {
     if (file) {
       const extension = file.name.split(".").pop() || ""
       if (["png", "jpg", "bmp"].includes(extension)) ocr(file)
+      if (["doc", "docx", "pdf"].includes(extension)) wordPdf(file)
     }
   }, [files])
 
@@ -85,7 +86,18 @@ export default function New({ open, setOpen }: NewProps) {
     add("")
   }
 
+  function loading() {
+    toast({
+      title: "Importing...",
+      status: "info",
+      isClosable: false,
+      duration: null
+    })
+  }
+
   async function ocr(file: File) {
+    loading()
+    setOpen(false)
     const worker = createWorker({
       logger: m => console.log(m),
     });
@@ -94,8 +106,30 @@ export default function New({ open, setOpen }: NewProps) {
     await worker.initialize('eng');
     const { data: { text } } = await worker.recognize(file);
     console.log(text);
-    debugger
+    add(text)
+    toast.closeAll()
     await worker.terminate();
+  }
+
+  async function wordPdf(file: File) {
+    loading()
+    setOpen(false)
+    const formData = new FormData()
+    formData.append("file", file)
+
+    const response = await fetch("http://localhost:8929/file", {
+      method: "POST",
+      body: formData,
+    }).catch(error => console.log(error))
+
+    if (response) {
+      const text = await response.text()
+      console.log(text)
+      add(text)
+      toast.closeAll()
+    } else {
+      toast.closeAll()
+    }
   }
 
   async function add(text: string) {

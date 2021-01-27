@@ -15,7 +15,11 @@
     "@types/node": "^14.14.22",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "any-text": "^1.1.0",
+    "cors": "^2.8.5",
     "dayjs": "^1.10.3",
+    "express": "^4.17.1",
+    "express-fileupload": "^1.2.1",
     "firebase": "^8.2.2",
     "framer-motion": "^3.2.1",
     "fuse.js": "^6.4.6",
@@ -46,7 +50,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "deploy": "react-scripts build && firebase deploy",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "server": "node ./server.js"
   },
   "eslintConfig": {
     "extends": [

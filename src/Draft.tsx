@@ -51,7 +51,7 @@ export default function Draft() {
         title: "You are in offline mode",
         description: "Changes will not be saved to cloud",
         status: "info",
-        isClosable: true
+        isClosable: true,
       })
     }
     return debounce(offline, 1000, { leading: true, trailing: false })
