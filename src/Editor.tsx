@@ -284,7 +284,7 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
     const type = ydoc.getText(id)
     const name = user?.isAnonymous ? "Guest" : user?.displayName
     new IndexeddbPersistence(id, ydoc)
-    const websocketProvider = new WebsocketProvider("wss://rlgo.duckdns.org", id, ydoc)
+    const websocketProvider = new WebsocketProvider("wss://rlgo.duckdns.org/yjs-ws", id, ydoc)
     websocketProvider.connect()
     const webrtcProvider = new WebrtcProvider(id, ydoc)
     webrtcProvider.connect()
@@ -327,13 +327,14 @@ export default function Editor({ id, open, setOpen }: EditorProps) {
           // @ts-ignore
           const versions: string[] = doc?.data().versions
           const oldBase64 = versions[versions.length - 1] || null
+          const text = quillRef.current?.getEditor().getContents()
 
           if (!oldBase64 || !equalYDoc(yydoc, oldBase64, id)) {
             const newStateUpdate = Y.encodeStateAsUpdate(yydoc)
             const base64State = fromUint8Array(newStateUpdate)
             //save version
             firebase.firestore().collection("drafts").doc(id).update({
-              versions: firebase.firestore.FieldValue.arrayUnion((base64State))
+              versions: firebase.firestore.FieldValue.arrayUnion((text))
             })
           }
         }

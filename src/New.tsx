@@ -117,7 +117,7 @@ export default function New({ open, setOpen }: NewProps) {
     const formData = new FormData()
     formData.append("file", file)
 
-    const response = await fetch("http://localhost:8929/file", {
+    const response = await fetch("https://rlgo.duckdns.org/yjs-file", {
       method: "POST",
       body: formData,
     }).catch(error => console.log(error))
